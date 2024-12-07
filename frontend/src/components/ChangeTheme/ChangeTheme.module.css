@@ -1,0 +1,16 @@
+.ChangeTheme {
+  background-color: var(--h2--color);
+  height: 32px;
+  width: 34px;
+  color: var(--color--a);
+  border: 2px solid;
+  border-radius: 3px;
+  border-color: grey;
+  margin-right: 5px;
+  cursor: pointer;
+
+  & svg {
+    height: 100%;
+    width: 100%;
+  }
+}

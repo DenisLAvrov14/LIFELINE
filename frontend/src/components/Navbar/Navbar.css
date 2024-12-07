@@ -1,0 +1,37 @@
+.navbar {
+  width: 150px;
+  background-color: transparent;
+  height: 100vh;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  margin-top: 7em;
+  top: 0;
+  left: 0;
+}
+
+nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+nav ul li {
+  padding: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  color: var(--border-color);
+}
+
+nav ul li.selected {
+  font-weight: bold;
+  color: green; /* Выделение активного элемента */
+}
+
+nav ul li .icon {
+  flex-shrink: 0; /* Иконка не должна сжиматься */
+}

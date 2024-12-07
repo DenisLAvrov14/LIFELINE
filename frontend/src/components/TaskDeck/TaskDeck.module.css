@@ -1,0 +1,55 @@
+.list {
+  background-color: transparent;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.taskItem {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  justify-content: center;
+}
+
+.taskContainer {
+  display: flex;
+  align-items: center;
+  background-color: yellow;
+  border: 1px solid bisque;
+  width: 404px;
+  height: 31px;
+  border-radius: 3px;
+  margin-right: 5px;
+  cursor: default; /* Начальный курсор */
+}
+
+.taskContainer.cursorPointer {
+  cursor: pointer; /* Курсор меняется на "руку" после запуска таймера */
+}
+
+.buttons {
+  display: flex;
+  align-items: center;
+  margin-top: 5px;
+  margin-left: 1px;
+}
+
+.timerContainer {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 31px; /* Устанавливаем высоту для контейнера таймера */
+}
+
+.timerDisplay {
+  font-size: 1.3em;
+  text-align: center;
+}
+
+li {
+  list-style: none;
+  height: 31px; /* Устанавливаем высоту для элемента списка */
+}

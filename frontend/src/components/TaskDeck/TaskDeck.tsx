@@ -12,7 +12,6 @@ import {
 } from "react-icons/bi";
 import styles from "./TaskDeck.module.css";
 import { Task } from "../../models/Task";
-import { useDispatch } from "react-redux";
 import { TaskInput } from "../../components/TaskInput/TaskInput";
 import { IconButton } from "../../components/IconButton/IconButton";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -24,7 +23,6 @@ type Props = {
 
 const TaskDeck: React.FC<Props> = (props) => {
     const { task } = props;
-    const dispatch = useDispatch();
     const userId = "00000000-0000-0000-0000-000000000001";
 
     const [isEdit, setIsEdit] = useState<boolean>(false);

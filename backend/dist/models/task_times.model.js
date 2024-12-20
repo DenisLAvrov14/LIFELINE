@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getTaskTimes = exports.updateTaskTime = exports.createTaskTime = void 0;
+exports.updateTimerModel = exports.updateTaskTimeModel = exports.getTaskTimes = exports.updateTaskTime = exports.createTaskTime = void 0;
 const db_connection_1 = __importDefault(require("../services/db.connection"));
 // Создание записи времени задачи
 const createTaskTime = (taskTime) => __awaiter(void 0, void 0, void 0, function* () {
@@ -53,3 +53,28 @@ const getTaskTimes = (user_id) => __awaiter(void 0, void 0, void 0, function* ()
     return rows;
 });
 exports.getTaskTimes = getTaskTimes;
+const updateTaskTimeModel = (taskTime) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id, task_id, user_id, start_time, end_time, duration } = taskTime;
+    const query = `
+    UPDATE task_times 
+    SET start_time = $1, end_time = $2, duration = $3
+    WHERE id = $4
+    RETURNING *;
+  `;
+    const values = [start_time, end_time, duration, id];
+    const { rows } = yield db_connection_1.default.query(query, values);
+    return rows[0];
+});
+exports.updateTaskTimeModel = updateTaskTimeModel;
+const updateTimerModel = (_a) => __awaiter(void 0, [_a], void 0, function* ({ task_id, elapsed_time, is_running, }) {
+    const query = `
+    UPDATE task_times 
+    SET duration = $1, end_time = CASE WHEN $2 = false THEN NOW() ELSE end_time END
+    WHERE task_id = $3 AND end_time IS NULL
+    RETURNING *;
+  `;
+    const values = [elapsed_time, is_running, task_id];
+    const { rows } = yield db_connection_1.default.query(query, values);
+    return rows[0];
+});
+exports.updateTimerModel = updateTimerModel;

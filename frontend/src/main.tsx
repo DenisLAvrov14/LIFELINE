@@ -10,7 +10,7 @@ import { ThemeProvider } from "./providers/ThemeProvider";
 const queryClient = new QueryClient();
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
+  // <React.StrictMode>
     <ThemeProvider>
       <Provider store={store}>
         <QueryClientProvider client={queryClient}>
@@ -18,6 +18,6 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         </QueryClientProvider>
       </Provider>
     </ThemeProvider>
-  </React.StrictMode>
+  // </React.StrictMode>
 );
 

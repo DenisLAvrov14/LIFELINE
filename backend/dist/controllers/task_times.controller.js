@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateTimerController = exports.startTimerController = exports.getTimerStatus = exports.deleteTask = exports.markTaskAsDone = exports.updateTaskTimeController = exports.createTaskTimeController = void 0;
+exports.stopTimerController = exports.updateTimerController = exports.startTimerController = exports.getTimerStatus = exports.deleteTask = exports.markTaskAsDone = exports.updateTimerStatusController = exports.updateTaskTimeController = exports.createTaskTimeController = void 0;
 const task_times_model_1 = require("../models/task_times.model");
 const db_connection_1 = __importDefault(require("../services/db.connection"));
 // Создание записи времени выполнения задачи
@@ -41,20 +41,20 @@ const createTaskTimeController = (req, res) => __awaiter(void 0, void 0, void 0,
     }
 });
 exports.createTaskTimeController = createTaskTimeController;
-// Обновление записи времени выполнения задачи
+// Контроллер для обновления времени выполнения задачи
 const updateTaskTimeController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id, task_id, user_id, start_time, end_time, duration } = req.body;
     try {
-        const startTimeFormatted = new Date(start_time).toISOString();
-        const endTimeFormatted = new Date(end_time).toISOString();
-        yield (0, task_times_model_1.updateTaskTime)({
-            id,
-            task_id,
-            user_id,
-            start_time: startTimeFormatted,
-            end_time: endTimeFormatted,
+        if (!start_time || isNaN(new Date(start_time).getTime())) {
+            return res.status(400).send("Invalid start_time format");
+        }
+        const updateFields = {
+            start_time: new Date(start_time).toISOString(),
             duration,
-        });
+            end_time: end_time ? new Date(end_time).toISOString() : null,
+        };
+        console.log("Updating task time:", Object.assign({ id, task_id, user_id }, updateFields));
+        yield (0, task_times_model_1.updateTaskTime)(Object.assign({ id, task_id, user_id }, updateFields));
         res.status(200).json({ message: "Task time updated successfully" });
     }
     catch (error) {
@@ -63,6 +63,27 @@ const updateTaskTimeController = (req, res) => __awaiter(void 0, void 0, void 0,
     }
 });
 exports.updateTaskTimeController = updateTaskTimeController;
+// Контроллер для обновления статуса таймера (пауза/возобновление)
+const updateTimerStatusController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { task_id, elapsed_time, is_running } = req.body;
+    try {
+        if (!task_id || elapsed_time === undefined || is_running === undefined) {
+            return res.status(400).send("Invalid data: Missing required fields");
+        }
+        console.log("Updating timer status:", { task_id, elapsed_time, is_running });
+        yield (0, task_times_model_1.updateTimerModel)({
+            task_id,
+            elapsed_time: Math.round(elapsed_time),
+            is_running,
+        });
+        res.status(200).json({ message: "Timer status updated successfully" });
+    }
+    catch (error) {
+        console.error("Error updating timer status:", error.message);
+        res.status(500).send(`Error updating timer status: ${error.message}`);
+    }
+});
+exports.updateTimerStatusController = updateTimerStatusController;
 // Отметить задачу как выполненную
 const markTaskAsDone = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
@@ -170,3 +191,33 @@ const updateTimerController = (req, res) => __awaiter(void 0, void 0, void 0, fu
     }
 });
 exports.updateTimerController = updateTimerController;
+const stopTimerController = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { task_id, end_time } = req.body;
+    try {
+        // Проверка входных данных
+        if (!task_id || !end_time) {
+            return res.status(400).send("Missing task_id or end_time");
+        }
+        // Обновляем запись времени, завершая таймер
+        const query = `
+      UPDATE task_times
+      SET end_time = $1
+      WHERE task_id = $2 AND end_time IS NULL
+      RETURNING *;
+    `;
+        const values = [end_time, task_id];
+        const { rows } = yield db_connection_1.default.query(query, values);
+        if (rows.length === 0) {
+            return res.status(404).send("No running timer found for this task");
+        }
+        res.status(200).json({
+            message: "Timer stopped successfully",
+            data: rows[0],
+        });
+    }
+    catch (error) {
+        console.error("Error stopping timer:", error.message);
+        res.status(500).send(`Error stopping timer: ${error.message}`);
+    }
+});
+exports.stopTimerController = stopTimerController;

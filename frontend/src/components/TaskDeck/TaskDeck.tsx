@@ -34,7 +34,6 @@ const TaskDeck: React.FC<Props> = (props) => {
     const [elapsedTime, setElapsedTime] = useState(0); // Время до паузы
     const [cursorPointer, setCursorPointer] = useState<boolean>(false);
 
-
     const handleEdit = useCallback(() => {
         setIsEdit((prev) => !prev);
     }, []);
@@ -49,42 +48,6 @@ const TaskDeck: React.FC<Props> = (props) => {
         },
         onSuccess: () => {
             console.log("[DELETE TASK] Task deleted:", taskId);
-            queryClient.invalidateQueries({ queryKey: ["todos"] });
-        },
-    });
-
-    const mutationSaveTime = useMutation({
-        mutationFn: async ({
-            taskId,
-            userId,
-            startTime,
-            endTime,
-            duration,
-        }: {
-            taskId: string;
-            userId: string;
-            startTime: Date;
-            endTime: Date;
-            duration: number;
-        }) => {
-            console.log(
-                "[SAVE TIME] Sending:",
-                taskId,
-                userId,
-                startTime,
-                endTime,
-                duration
-            );
-            return await todosService.saveTaskTime(
-                taskId,
-                userId,
-                startTime,
-                endTime,
-                duration
-            );
-        },
-        onSuccess: () => {
-            console.log("[SAVE TIME] Time saved successfully.");
             queryClient.invalidateQueries({ queryKey: ["todos"] });
         },
     });
@@ -214,6 +177,8 @@ const TaskDeck: React.FC<Props> = (props) => {
             queryClient.invalidateQueries({ queryKey: ["todos"] });
 
             console.log("[STOP AND DONE] Task marked as done.");
+            // After marking as done, show the default buttons
+            setIsTimerVisible(false);
         } catch (error) {
             console.error("[STOP AND DONE] Error stopping timer and marking as done:", error);
         }
@@ -237,7 +202,6 @@ const TaskDeck: React.FC<Props> = (props) => {
             setCursorPointer(false);
         }
     }, [isTimerVisible]);
-    
 
     const renderButtons = () => {
         if (isTimerVisible) {
@@ -266,14 +230,14 @@ const TaskDeck: React.FC<Props> = (props) => {
 
         if (isEdit) {
             return (
-                <>
+                <div className={styles.editButton}>
                     <IconButton onClick={handleSave}>
                         <BiTask title="Accept" />
                     </IconButton>
                     <IconButton onClick={handleCancel}>
                         <BiTaskX title="Undo" />
                     </IconButton>
-                </>
+                </div>
             );
         }
 

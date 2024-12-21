@@ -13,17 +13,58 @@
   justify-content: center;
 }
 
+.taskDescription {
+  width: 404px;
+  margin-left: 10px;
+}
+
+/* Общий стиль для всех задач */
 .taskContainer {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   background-color: yellow;
   border: 1px solid bisque;
-  width: 404px;
+  width: 406px;
   height: 31px;
   border-radius: 3px;
-  margin-left: -8px;
-  cursor: default; /* Начальный курсор */
+  margin-left: -7px;
+  cursor: default;
+  box-sizing: border-box;
 }
+
+/* Когда задача редактируется */
+.taskContainer.isEdit {
+  background-color: transparent; /* Другой цвет фона для режима редактирования */
+  border: 1px solid transparent;
+}
+
+/* Когда задача завершена */
+.taskContainer.isDone {
+  background-color: lightgreen; /* Другой цвет для завершенных задач */
+  text-decoration: line-through; /* Перечеркиваем текст */
+}
+
+/* Таймер */
+.timerContainer {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 31px;
+}
+
+/* Поле ввода */
+.taskInput {
+  background-color: yellow;
+  border: 1px solid bisque;
+  width: 100%;
+  height: 29px;
+  border-radius: 3px;
+  margin-left: 0;
+  box-sizing: border-box;
+}
+
 
 .taskContainer.cursorPointer {
   cursor: pointer; /* Курсор меняется на "руку" после запуска таймера */
@@ -32,22 +73,17 @@
 .buttons {
   display: flex;
   align-items: center;
+  justify-content: flex-end; /* Кнопки остаются справа */
   margin-top: 5px;
-  margin-left: 1px;
+  margin-right: 4px;
 }
 
 .editButton {
   display: flex;
   flex-direction: row;
-  margin-left: 10px;
-}
-
-.timerContainer {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 31px; /* Устанавливаем высоту для контейнера таймера */
+  justify-content: flex-end; /* Кнопки редактирования остаются справа */
+  margin-left: 4px;
+  margin-right: 42px;
 }
 
 .timerDisplay {

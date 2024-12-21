@@ -228,19 +228,6 @@ const TaskDeck: React.FC<Props> = (props) => {
             );
         }
 
-        if (isEdit) {
-            return (
-                <div className={styles.editButton}>
-                    <IconButton onClick={handleSave}>
-                        <BiTask title="Accept" />
-                    </IconButton>
-                    <IconButton onClick={handleCancel}>
-                        <BiTaskX title="Undo" />
-                    </IconButton>
-                </div>
-            );
-        }
-
         return (
             <>
                 <IconButton onClick={handleStartOrReset}>
@@ -254,33 +241,58 @@ const TaskDeck: React.FC<Props> = (props) => {
                 </IconButton>
             </>
         );
-    };
+    }; 
 
     return (
         <div className={styles.taskItem}>
-            <li
-                className={`${styles.taskContainer} ${cursorPointer ? styles.cursorPointer : ""}`}
-                onClick={() => setIsTimerVisible(!isTimerVisible)}
-            >
-                <div className={styles.taskContent}>
-                    {!isEdit && !isTimerVisible && task.description}
-                    {isEdit && (
-                        <TaskInput autoFocus value={inputEdit} onChange={handleChangeInput} />
-                    )}
-                    {isTimerVisible && (
-                        <div className={styles.timerContainer}>
-                            <p className={styles.timerDisplay}>
-                                {String(Math.floor(time / 3600)).padStart(2, "0")}:
-                                {String(Math.floor((time % 3600) / 60)).padStart(2, "0")}:
-                                {String(time % 60).padStart(2, "0")}
-                            </p>
-                        </div>
-                    )}
-                </div>
-            </li>
-            <div className={styles.buttons}>{renderButtons()}</div>
+            <div className={styles.taskDescription}>
+                <li
+                     className={`${styles.taskContainer} ${isEdit ? styles.isEdit : ""} ${
+                        task.isDone ? styles.isDone : ""
+                    }`}
+                    onClick={() => !isEdit && setIsTimerVisible(!isTimerVisible)}
+                >
+                    <div className={styles.taskContent}>
+                        {/* Render only one: editing input or task description/timer */}
+                        {isEdit ? (
+                            <TaskInput
+                                autoFocus
+                                value={inputEdit}
+                                onChange={handleChangeInput}
+                            />
+                        ) : isTimerVisible ? (
+                            // Timer Display Mode
+                            <div className={styles.timerContainer}>
+                                <p className={styles.timerDisplay}>
+                                    {String(Math.floor(time / 3600)).padStart(2, "0")}:
+                                    {String(Math.floor((time % 3600) / 60)).padStart(2, "0")}:
+                                    {String(time % 60).padStart(2, "0")}
+                                </p>
+                            </div>
+                        ) : (
+                            // Task Description Mode
+                            <div>{task.description}</div>
+                        )}
+                    </div>
+                </li>
+            </div>
+            <div className={styles.buttons }>
+                {isEdit ? (
+                    <div className={styles.editButton }>
+                        <IconButton onClick={handleSave}>
+                            <BiTask title="Accept" />
+                        </IconButton>
+                        <IconButton onClick={handleCancel}>
+                            <BiTaskX title="Undo" />
+                        </IconButton>
+                    </div>
+                ) : (
+                    renderButtons()
+                )}
+            </div>
         </div>
     );
+      
 };
 
 export default TaskDeck;

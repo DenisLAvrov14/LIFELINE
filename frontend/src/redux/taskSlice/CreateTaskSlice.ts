@@ -1,16 +1,16 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Task } from "../../models/Task";
-import { TaskState } from "../../models/TaskState";
-import { Filter } from "../../models/InitialTask";
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { Task } from '../../models/Task';
+import { TaskState } from '../../models/TaskState';
+import { Filter } from '../../models/InitialTask';
 
 const initialState: TaskState = {
   tasks: {},
   timer: {},
-  filter: "all",
+  filter: 'all',
 };
 
 const taskSlice = createSlice({
-  name: "todoTasks",
+  name: 'todoTasks',
   initialState,
   reducers: {
     addTask: (state, action: PayloadAction<Task>) => {
@@ -18,7 +18,10 @@ const taskSlice = createSlice({
       state.tasks[id] = { id, description, isDone };
       state.timer[id] = { time: 0, isRunning: false };
     },
-    updateTask: (state, action: PayloadAction<{ id: string; description: string }>) => {
+    updateTask: (
+      state,
+      action: PayloadAction<{ id: string; description: string }>
+    ) => {
       const { id, description } = action.payload;
       if (state.tasks[id]) {
         state.tasks[id].description = description;

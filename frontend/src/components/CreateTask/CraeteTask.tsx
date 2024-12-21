@@ -1,18 +1,18 @@
-import React, { ChangeEvent, useCallback, useState } from "react";
-import styles from "./CreateTask.module.css";
-import { BiSolidPlusCircle } from "react-icons/bi";
-import { useDispatch } from "react-redux";
-import { setFilterValue, addTask } from "../../redux/taskSlice/CreateTaskSlice";
-import { IconButton } from "../../components/IconButton/IconButton";
-import { Filter } from "../../models/InitialTask";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import todosService from "../../services/todos.service";
-import ChangeTheme from "../../components/ChangeTheme/ChangeTheme";
+import React, { ChangeEvent, useCallback, useState } from 'react';
+import styles from './CreateTask.module.css';
+import { BiSolidPlusCircle } from 'react-icons/bi';
+import { useDispatch } from 'react-redux';
+import { setFilterValue, addTask } from '../../redux/taskSlice/CreateTaskSlice';
+import { IconButton } from '../../components/IconButton/IconButton';
+import { Filter } from '../../models/InitialTask';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import todosService from '../../services/todos.service';
+import ChangeTheme from '../../components/ChangeTheme/ChangeTheme';
 
 const CreateTask: React.FC = () => {
   const dispatch = useDispatch();
-  const [taskDescription, setTaskDescription] = useState<string>("");
-  const [filterValue, setLocalFilterValue] = useState<Filter>("all");
+  const [taskDescription, setTaskDescription] = useState<string>('');
+  const [filterValue, setLocalFilterValue] = useState<Filter>('all');
 
   const queryClient = useQueryClient();
 
@@ -24,10 +24,16 @@ const CreateTask: React.FC = () => {
       const startTime = new Date();
       const endTime = new Date();
       const duration = 0;
-      const userId = "00000000-0000-0000-0000-000000000001";
+      const userId = '00000000-0000-0000-0000-000000000001';
 
       try {
-        await todosService.createTaskTime(data.id, userId, startTime, endTime, duration);
+        await todosService.createTaskTime(
+          data.id,
+          userId,
+          startTime,
+          endTime,
+          duration
+        );
 
         // Обновляем Redux store
         dispatch(
@@ -39,24 +45,24 @@ const CreateTask: React.FC = () => {
         );
 
         // Инвалидируем кэш React Query
-        queryClient.invalidateQueries({ queryKey: ["todos"] });
-        alert("Task was added successfully!");
+        queryClient.invalidateQueries({ queryKey: ['todos'] });
+        alert('Task was added successfully!');
       } catch (error) {
-        console.error("Error creating task time:", error);
-        alert("Error adding task time. Please try again.");
+        console.error('Error creating task time:', error);
+        alert('Error adding task time. Please try again.');
       }
 
-      setTaskDescription(""); // Сброс поля ввода
+      setTaskDescription(''); // Сброс поля ввода
     },
     onError: (error) => {
-      console.error("Error creating task:", error);
-      alert("Failed to create task. Please try again.");
+      console.error('Error creating task:', error);
+      alert('Failed to create task. Please try again.');
     },
   });
 
   const handleAddTask = useCallback(() => {
     if (!taskDescription.trim()) {
-      alert("Task description cannot be empty.");
+      alert('Task description cannot be empty.');
       return;
     }
 

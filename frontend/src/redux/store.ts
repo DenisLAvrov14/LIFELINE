@@ -1,15 +1,15 @@
-import { configureStore } from "@reduxjs/toolkit";
+import { configureStore } from '@reduxjs/toolkit';
 import {
-    TypedUseSelectorHook,
-    useDispatch as useDispatchLib,
-    useSelector as useSelectorLib,
-} from "react-redux";
-import taskSlice from "./taskSlice/CreateTaskSlice"; 
+  TypedUseSelectorHook,
+  useDispatch as useDispatchLib,
+  useSelector as useSelectorLib,
+} from 'react-redux';
+import taskSlice from './taskSlice/CreateTaskSlice';
 
 export const store = configureStore({
-    reducer: {
-        tasks: taskSlice, // Используем taskSlice напрямую, без reducerPath
-    },
+  reducer: {
+    tasks: taskSlice, // Используем taskSlice напрямую, без reducerPath
+  },
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself

@@ -14,7 +14,10 @@ export const getTodos = async () => {
 
 export const addTodo = async (description: string, is_done: boolean) => {
   try {
-    const response = await axios.post(`${API_URL}/tasks`, { description, is_done });
+    const response = await axios.post(`${API_URL}/tasks`, {
+      description,
+      is_done,
+    });
     return response.data;
   } catch (error) {
     console.error('Error adding todo:', error);
@@ -22,9 +25,16 @@ export const addTodo = async (description: string, is_done: boolean) => {
   }
 };
 
-export const updateTodo = async (id: string, description: string, is_done: boolean) => {
+export const updateTodo = async (
+  id: string,
+  description: string,
+  is_done: boolean
+) => {
   try {
-    const response = await axios.put(`${API_URL}/todos/${id}`, { description, is_done });
+    const response = await axios.put(`${API_URL}/todos/${id}`, {
+      description,
+      is_done,
+    });
     return response.data;
   } catch (error) {
     console.error('Error updating todo:', error);
@@ -59,14 +69,22 @@ export const createTask = async (description: string) => {
     });
     return response.data;
   } catch (error) {
-    console.error("Error creating task:", error);
+    console.error('Error creating task:', error);
     throw error;
   }
 };
 
-
-export const createTaskTime = async (taskId: number, userId: string | null, startTime: Date, endTime: Date, duration: number) => {
-  const startTimeFormatted = startTime.toISOString().slice(0, 19).replace('T', ' ');
+export const createTaskTime = async (
+  taskId: number,
+  userId: string | null,
+  startTime: Date,
+  endTime: Date,
+  duration: number
+) => {
+  const startTimeFormatted = startTime
+    .toISOString()
+    .slice(0, 19)
+    .replace('T', ' ');
   const endTimeFormatted = endTime.toISOString().slice(0, 19).replace('T', ' ');
 
   try {
@@ -84,7 +102,6 @@ export const createTaskTime = async (taskId: number, userId: string | null, star
   }
 };
 
-
 export const getTaskTimes = async (userId: string) => {
   try {
     const response = await axios.get(`${API_URL}/task-times/${userId}`);
@@ -98,11 +115,11 @@ export const getTaskTimes = async (userId: string) => {
 export const taskIsDone = async (taskId: string) => {
   try {
     const response = await axios.put(`${API_URL}/tasks/${taskId}/done`, {
-      is_done: true, 
+      is_done: true,
     });
     return response.data;
   } catch (error) {
-    console.error("Error marking task as done:", error);
+    console.error('Error marking task as done:', error);
     throw error;
   }
 };
@@ -115,31 +132,30 @@ export const saveTaskTime = async (
   duration: number
 ) => {
   try {
-      const response = await axios.post(`${API_URL}/task-times`, {
-          task_id: taskId,
-          user_id: userId,
-          start_time: startTime.toISOString(),
-          end_time: endTime.toISOString(),
-          duration: Math.round(duration), 
-      });
-      return response.data;
+    const response = await axios.post(`${API_URL}/task-times`, {
+      task_id: taskId,
+      user_id: userId,
+      start_time: startTime.toISOString(),
+      end_time: endTime.toISOString(),
+      duration: Math.round(duration),
+    });
+    return response.data;
   } catch (error) {
-      console.error("Error saving task time:", error);
-      throw error;
+    console.error('Error saving task time:', error);
+    throw error;
   }
 };
-
 
 export const startTimer = async (taskId: string, startTime: Date) => {
   try {
     const response = await axios.post(`${API_URL}/timer/start`, {
       task_id: taskId,
-      user_id: "00000000-0000-0000-0000-000000000001",
+      user_id: '00000000-0000-0000-0000-000000000001',
       start_time: startTime.toISOString(),
     });
     return response.data;
   } catch (error) {
-    console.error("Error starting timer:", error);
+    console.error('Error starting timer:', error);
     throw error;
   }
 };
@@ -149,12 +165,12 @@ export const pauseTimer = async (taskId: string, elapsedTime: number) => {
     const response = await axios.post(`${API_URL}/timer/pause`, {
       task_id: taskId,
       elapsed_time: Math.round(elapsedTime),
-      is_running: false 
+      is_running: false,
     });
-    console.log("Timer paused:", response.data);
+    console.log('Timer paused:', response.data);
     return response.data;
   } catch (error) {
-    console.error("Error pausing timer:", error);
+    console.error('Error pausing timer:', error);
     throw error;
   }
 };
@@ -165,10 +181,10 @@ export const resumeTimer = async (taskId: string, elapsedTime: number) => {
       task_id: taskId,
       elapsed_time: Math.round(elapsedTime),
     });
-    console.log("Timer resumed:", response.data);
+    console.log('Timer resumed:', response.data);
     return response.data;
   } catch (error) {
-    console.error("Error resuming timer:", error);
+    console.error('Error resuming timer:', error);
     throw error;
   }
 };
@@ -181,36 +197,45 @@ export const updateTaskTime = async (
   endTime: Date | null,
   duration: number
 ) => {
-  console.log("Sending task time update:", {
-      id,
-      task_id: taskId,
-      user_id: userId,
-      start_time: startTime.toISOString(),
-      end_time: endTime ? endTime.toISOString() : null,
-      duration: Math.round(duration),
+  console.log('Sending task time update:', {
+    id,
+    task_id: taskId,
+    user_id: userId,
+    start_time: startTime.toISOString(),
+    end_time: endTime ? endTime.toISOString() : null,
+    duration: Math.round(duration),
   });
 
   try {
-      const response = await axios.post(`${API_URL}/task-times/update-task-time`, {
-          id,
-          task_id: taskId,
-          user_id: userId,
-          start_time: startTime.toISOString(),
-          end_time: endTime ? endTime.toISOString() : null,
-          duration: Math.round(duration),
-      });
-      console.log("Task time update response:", response.data);
-      return response.data;
+    const response = await axios.post(
+      `${API_URL}/task-times/update-task-time`,
+      {
+        id,
+        task_id: taskId,
+        user_id: userId,
+        start_time: startTime.toISOString(),
+        end_time: endTime ? endTime.toISOString() : null,
+        duration: Math.round(duration),
+      }
+    );
+    console.log('Task time update response:', response.data);
+    return response.data;
   } catch (error) {
-      const err = error as AxiosError;
-      console.error("Error updating task time:", err.response?.data || err.message);
-      throw err;
+    const err = error as AxiosError;
+    console.error(
+      'Error updating task time:',
+      err.response?.data || err.message
+    );
+    throw err;
   }
 };
 
 export const stopTimer = async (taskId: string, endTime: Date) => {
   try {
-    const response = await axios.post(`${API_URL}/timer/stop`, { task_id: taskId, end_time: endTime.toISOString() });
+    const response = await axios.post(`${API_URL}/timer/stop`, {
+      task_id: taskId,
+      end_time: endTime.toISOString(),
+    });
     return response.data;
   } catch (error) {
     console.error('Error stopping timer:', error);
@@ -240,11 +265,11 @@ const todosService = {
   taskIsDone,
   saveTaskTime,
   startTimer,
-  updateTaskTime,   
+  updateTaskTime,
   stopTimer,
   getTimerStatus,
   pauseTimer,
-  resumeTimer 
+  resumeTimer,
 };
 
 export default todosService;

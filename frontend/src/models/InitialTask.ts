@@ -1,1 +1,1 @@
-export type Filter = "all" | "done" | "undone";
+export type Filter = 'all' | 'done' | 'undone';

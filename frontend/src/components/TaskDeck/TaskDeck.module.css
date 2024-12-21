@@ -65,7 +65,6 @@
   box-sizing: border-box;
 }
 
-
 .taskContainer.cursorPointer {
   cursor: pointer; /* Курсор меняется на "руку" после запуска таймера */
 }

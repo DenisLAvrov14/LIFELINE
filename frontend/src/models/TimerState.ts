@@ -1,4 +1,4 @@
 export type TimerState = {
-    time: number;
-    isRunning: boolean;
-  };
+  time: number;
+  isRunning: boolean;
+};

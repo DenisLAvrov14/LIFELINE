@@ -1,106 +1,55 @@
-import React from 'react';
-import styles from './Statistics.module.css';
+import React, { useEffect, useState } from "react";
+import styles from "./Statistics.module.css";
+import AvatarBlock from "../../components/AvatarBlock/AvatarBlock";
+import ProgressSection from "../../components/ProgressSection/ProgressSection";
+import TaskStatisticsBlock from "../../components/TaskStatisticsBlock/TaskStatisticsBlock";
 
 const Statistics: React.FC = () => {
+  // Хуки для данных
+  const [healthStats, setHealthStats] = useState([
+    { label: "Health", value: 70 },
+    { label: "Fitness", value: 50 },
+  ]);
+
+  const [intellectualStats, setIntellectualStats] = useState([
+    { label: "Intelligence", value: 80 },
+    { label: "Creativity", value: 60 },
+  ]);
+
+  const [socialStats, setSocialStats] = useState([
+    { label: "Social Ability", value: 90 },
+    { label: "Community Contribution", value: 40 },
+    { label: "Environmental Responsibility", value: 30 },
+  ]);
+
+  const [knowledgeStats, setKnowledgeStats] = useState([
+    { label: "Specialized Knowledge", value: 75 },
+    { label: "Foreign Language Proficiency", value: 85 },
+  ]);
+
+  const [taskStats, setTaskStats] = useState([
+    { name: "Task 1", time: "2h 30m" },
+    { name: "Task 2", time: "1h 15m" },
+    { name: "Task 3", time: "3h 45m" },
+  ]);
+
   return (
     <div className={styles.userBlock}>
-      <div className={styles.avatar}></div>
+      {/* Блок с аватаром */}
+      {/* <AvatarBlock /> */}
+
       <div className={styles.statistics}>
         <h1>NAME NAME</h1>
         <div className={styles.container}>
-          <section className={styles.healthSection}>
-            <h2>Physical Health and Activity</h2>
-            <ul>
-              <li>
-                Health
-                <progress
-                  className={styles.progressBar}
-                  value="70"
-                  max="100"
-                ></progress>
-              </li>
-              <li>
-                Fitness
-                <progress
-                  className={styles.progressBar}
-                  value="50"
-                  max="100"
-                ></progress>
-              </li>
-            </ul>
-          </section>
-          <section className={styles.intellectualSection}>
-            <h2>Intellectual Development</h2>
-            <ul>
-              <li>
-                Intelligence
-                <progress
-                  className={styles.progressBar}
-                  value="80"
-                  max="100"
-                ></progress>
-              </li>
-              <li>
-                Creativity
-                <progress
-                  className={styles.progressBar}
-                  value="60"
-                  max="100"
-                ></progress>
-              </li>
-            </ul>
-          </section>
-          <section className={styles.socialSection}>
-            <h2>Social Activity and Community Contribution</h2>
-            <ul>
-              <li>
-                Social Ability
-                <progress
-                  className={styles.progressBar}
-                  value="90"
-                  max="100"
-                ></progress>
-              </li>
-              <li>
-                Community Contribution
-                <progress
-                  className={styles.progressBar}
-                  value="40"
-                  max="100"
-                ></progress>
-              </li>
-              <li>
-                Environmental Responsibility
-                <progress
-                  className={styles.progressBar}
-                  value="30"
-                  max="100"
-                ></progress>
-              </li>
-            </ul>
-          </section>
-          <section className={styles.knowledgeSection}>
-            <h2>Knowledge and Languages</h2>
-            <ul>
-              <li>
-                Specialized Knowledge
-                <progress
-                  className={styles.progressBar}
-                  value="75"
-                  max="100"
-                ></progress>
-              </li>
-              <li>
-                Foreign Language Proficiency
-                <progress
-                  className={styles.progressBar}
-                  value="85"
-                  max="100"
-                ></progress>
-              </li>
-            </ul>
-          </section>
+          {/* Секции характеристик */}
+          {/* <ProgressSection title="Physical Health and Activity" items={healthStats} />
+          <ProgressSection title="Intellectual Development" items={intellectualStats} />
+          <ProgressSection title="Social Activity and Community Contribution" items={socialStats} />
+          <ProgressSection title="Knowledge and Languages" items={knowledgeStats} /> */}
         </div>
+
+        {/* Блок статистики задач */}
+        <TaskStatisticsBlock />
       </div>
     </div>
   );

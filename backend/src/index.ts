@@ -7,6 +7,7 @@ import taskTimesRoutes from './routes/task_times.routes';
 import tasksRoutes from './routes/tasks.routes';
 import userRoutes from './routes/user.routes';
 import timerRoutes from './routes/timer.routes'
+import statisticsRoutes from './routes/statistics.routes';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -23,6 +24,7 @@ app.use('/task-times', taskTimesRoutes);
 app.use('/tasks', tasksRoutes); 
 app.use('/users', userRoutes);
 app.use('/timer', timerRoutes);
+app.use('/statistics', statisticsRoutes);
 
 app.use((req, res, next) => {
   console.log(`Request URL: ${req.url}`);

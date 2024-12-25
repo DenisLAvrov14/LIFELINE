@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import styles from "./Statistics.module.css";
+import TaskStatisticsBlock from "../../components/TaskStatisticsBlock/TaskStatisticsBlock";
 import AvatarBlock from "../../components/AvatarBlock/AvatarBlock";
 import ProgressSection from "../../components/ProgressSection/ProgressSection";
-import TaskStatisticsBlock from "../../components/TaskStatisticsBlock/TaskStatisticsBlock";
 
 const Statistics: React.FC = () => {
   // Хуки для данных
@@ -27,30 +26,26 @@ const Statistics: React.FC = () => {
     { label: "Foreign Language Proficiency", value: 85 },
   ]);
 
-  const [taskStats, setTaskStats] = useState([
-    { name: "Task 1", time: "2h 30m" },
-    { name: "Task 2", time: "1h 15m" },
-    { name: "Task 3", time: "3h 45m" },
-  ]);
-
   return (
-    <div className={styles.userBlock}>
+    <div className="container mx-auto p-4">
       {/* Блок с аватаром */}
-      {/* <AvatarBlock /> */}
+      {/* <div className="flex items-center justify-center my-4">
+        <AvatarBlock imageUrl="/path-to-avatar.jpg" />
+      </div> */}
 
-      <div className={styles.statistics}>
-        <h1>NAME NAME</h1>
-        <div className={styles.container}>
-          {/* Секции характеристик */}
-          {/* <ProgressSection title="Physical Health and Activity" items={healthStats} />
-          <ProgressSection title="Intellectual Development" items={intellectualStats} />
-          <ProgressSection title="Social Activity and Community Contribution" items={socialStats} />
-          <ProgressSection title="Knowledge and Languages" items={knowledgeStats} /> */}
-        </div>
+      {/* Заголовок страницы */}
+      <h1 className="text-3xl font-bold text-center mb-8">NAME NAME</h1>
 
-        {/* Блок статистики задач */}
-        <TaskStatisticsBlock />
-      </div>
+      {/* Секции характеристик */}
+      {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 mb-8">
+        <ProgressSection title="Physical Health and Activity" items={healthStats} />
+        <ProgressSection title="Intellectual Development" items={intellectualStats} />
+        <ProgressSection title="Social Activity and Community Contribution" items={socialStats} />
+        <ProgressSection title="Knowledge and Languages" items={knowledgeStats} />
+      </div> */}
+
+      {/* Блок статистики задач */}
+      <TaskStatisticsBlock />
     </div>
   );
 };

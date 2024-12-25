@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import styles from "./TaskStatisticsBlock.module.css";
 import { TaskStatisticBlock } from "../../models/TaskStaticsBlock";
 
 const TaskStatisticsBlock: React.FC = () => {
@@ -8,7 +7,9 @@ const TaskStatisticsBlock: React.FC = () => {
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const response = await fetch("http://localhost:3001/statistics?userId=00000000-0000-0000-0000-000000000001");
+        const response = await fetch(
+          "http://localhost:3001/statistics?userId=00000000-0000-0000-0000-000000000001"
+        );
         const data = await response.json();
 
         const formattedData = data.map((item: any) => {
@@ -33,14 +34,21 @@ const TaskStatisticsBlock: React.FC = () => {
   }, []);
 
   return (
-    <section className={styles.taskStatisticsSection}>
-      <h2>Task Time Statistics</h2>
-      <div className={styles.taskStatisticsContainer}>
-        <ul>
+    <section className="my-8 max-w-lg mx-auto">
+      <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">
+        Task Time Statistics
+      </h2>
+      <div className="bg-white shadow-md rounded-lg p-4">
+        <ul className="space-y-4">
           {tasks.map((task, index) => (
-            <li key={index}>
-              <span className={styles.taskName}>{task.description}</span>
-              <span className={styles.taskTime}>{task.time}</span>
+            <li
+              key={index}
+              className="flex justify-between items-center border-b pb-2 last:border-b-0"
+            >
+              <span className="text-lg font-medium text-gray-700">
+                {task.description}
+              </span>
+              <span className="text-lg text-gray-500">{task.time}</span>
             </li>
           ))}
         </ul>

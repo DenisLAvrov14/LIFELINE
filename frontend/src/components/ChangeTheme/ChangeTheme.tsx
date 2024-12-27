@@ -1,30 +1,38 @@
-import { useContext, useEffect } from 'react';
-import { ThemeContext } from '../../providers/ThemeProvider';
-import { BiSun, BiMoon } from 'react-icons/bi';
-import styles from './ChangeTheme.module.css';
+import { useContext, useEffect } from "react";
+import { ThemeContext } from "../../providers/ThemeProvider";
+import { BiSun, BiMoon } from "react-icons/bi";
 
 export const ChangeTheme = () => {
   const { theme, setTheme } = useContext(ThemeContext);
 
   const toggleTheme = () => {
-    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    const newTheme = theme === "dark" ? "light" : "dark";
     setTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
+    document.documentElement.classList.toggle("dark", newTheme === "dark");
+    localStorage.setItem("theme", newTheme);
   };
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
+    const savedTheme = localStorage.getItem("theme");
     if (savedTheme) {
       setTheme(savedTheme);
+      document.documentElement.classList.toggle("dark", savedTheme === "dark");
+    } else {
+      // Default to light theme if no theme is saved
+      document.documentElement.classList.add("light");
+      setTheme("light");
     }
   }, [setTheme]);
 
   return (
-    <button className={styles.ChangeTheme} onClick={toggleTheme}>
-      {theme === 'dark' ? (
-        <BiSun title="Light theme" />
+    <button
+      onClick={toggleTheme}
+      className="flex items-center justify-center w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-200 shadow-md hover:shadow-lg hover:bg-gray-300 dark:hover:bg-gray-700 transition duration-300"
+    >
+      {theme === "dark" ? (
+        <BiSun title="Switch to Light Theme" className="text-2xl" />
       ) : (
-        <BiMoon title="Dark theme" />
+        <BiMoon title="Switch to Dark Theme" className="text-2xl" />
       )}
     </button>
   );

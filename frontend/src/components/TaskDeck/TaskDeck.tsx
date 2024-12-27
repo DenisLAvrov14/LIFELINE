@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useCallback, useEffect, useState } from 'react';
+import React, { ChangeEvent, useCallback, useEffect, useState } from "react";
 import {
   BiSolidTrash,
   BiTask,
@@ -9,21 +9,20 @@ import {
   BiPause,
   BiReset,
   BiTimer,
-} from 'react-icons/bi';
-import styles from './TaskDeck.module.css';
-import { Task } from '../../models/Task';
-import { TaskInput } from '../../components/TaskInput/TaskInput';
-import { IconButton } from '../../components/IconButton/IconButton';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import todosService from '../../services/todos.service';
+} from "react-icons/bi";
+import styles from "./TaskDeck.module.css";
+import { Task } from "../../models/Task";
+import { TaskInput } from "../../components/TaskInput/TaskInput";
+import { IconButton } from "../../components/IconButton/IconButton";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import todosService from "../../services/todos.service";
 
 type Props = {
   task: Task;
 };
 
-const TaskDeck: React.FC<Props> = (props) => {
-  const { task } = props;
-  const userId = '00000000-0000-0000-0000-000000000001';
+const TaskDeck: React.FC<Props> = ({ task }) => {
+  const userId = "00000000-0000-0000-0000-000000000001";
 
   const [isEdit, setIsEdit] = useState<boolean>(false);
   const [inputEdit, setInputEdit] = useState<string>(task.description);
@@ -32,275 +31,183 @@ const TaskDeck: React.FC<Props> = (props) => {
   const [isRunning, setIsRunning] = useState(false); // Статус таймера
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [elapsedTime, setElapsedTime] = useState(0); // Время до паузы
-  const [cursorPointer, setCursorPointer] = useState<boolean>(false);
 
-  const handleEdit = useCallback(() => {
-    setIsEdit((prev) => !prev);
-  }, []);
-
-  const taskId = task.id;
+  const handleEdit = useCallback(() => setIsEdit((prev) => !prev), []);
   const queryClient = useQueryClient();
 
   const mutationDelete = useMutation({
-    mutationFn: async (taskId: string) => {
-      const result = await todosService.deleteTodo(taskId);
-      return result;
-    },
+    mutationFn: async (taskId: string) => todosService.deleteTodo(taskId),
     onSuccess: () => {
-      console.log('[DELETE TASK] Task deleted:', taskId);
-      queryClient.invalidateQueries({ queryKey: ['todos'] });
+      queryClient.invalidateQueries({ queryKey: ["todos"] });
     },
   });
 
-  const onDeleteTask = useCallback(async () => {
-    console.log('[DELETE TASK] Deleting task:', taskId);
-    await mutationDelete.mutate(taskId);
-  }, [mutationDelete, taskId]);
+  const onDeleteTask = useCallback(
+    () => mutationDelete.mutate(task.id),
+    [mutationDelete, task.id]
+  );
 
   const mutationUpdateTask = useMutation({
-    mutationFn: async ({
-      id,
-      description,
-    }: {
-      id: string;
-      description: string;
-    }) => {
-      console.log('[UPDATE TASK] Updating task:', id, description);
-      const result = await todosService.updateTodo(
-        id,
-        description,
-        task.isDone
-      );
-      return result;
-    },
+    mutationFn: async ({ id, description }: { id: string; description: string }) =>
+      todosService.updateTodo(id, description, task.isDone),
     onSuccess: () => {
-      console.log('[UPDATE TASK] Task updated successfully.');
-      queryClient.invalidateQueries({ queryKey: ['todos'] });
+      queryClient.invalidateQueries({ queryKey: ["todos"] });
       setIsEdit(false);
     },
   });
 
-  const handleSave = useCallback(() => {
-    mutationUpdateTask.mutate({ id: task.id, description: inputEdit });
-  }, [inputEdit, mutationUpdateTask, task.id]);
+  const handleSave = useCallback(
+    () => mutationUpdateTask.mutate({ id: task.id, description: inputEdit }),
+    [inputEdit, mutationUpdateTask, task.id]
+  );
 
-  const handleCancel = useCallback(() => {
-    setIsEdit(false);
-  }, []);
-
+  const handleCancel = useCallback(() => setIsEdit(false), []);
   const handleChangeInput = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setInputEdit(e.target.value);
   }, []);
 
-  // Start/Reset button logic
-  const handleStartOrReset = useCallback(async () => {
+  // Таймер: старт, пауза, сброс
+  const handleStartOrReset = useCallback(() => {
     if (isRunning || elapsedTime > 0) {
-      // Reset logic
-      setIsTimerVisible(false);
       setIsRunning(false);
+      setIsTimerVisible(false);
       setElapsedTime(0);
       setStartTime(null);
       setTime(0);
-      console.log('[RESET TIMER] Timer reset.');
     } else {
-      // Start logic
-      try {
-        const now = new Date();
-        const response = await todosService.startTimer(taskId, now);
-        if (response.success) {
-          setStartTime(now);
-          setIsRunning(true);
-          setElapsedTime(0);
-          setIsTimerVisible(true);
-          console.log('[START TIMER] Timer started successfully.');
-        } else {
-          throw new Error(response.message || 'Failed to start timer.');
-        }
-      } catch (error) {
-        console.error('[START TIMER] Error starting timer:', error);
-      }
+      const now = new Date();
+      setStartTime(now);
+      setIsRunning(true);
+      setIsTimerVisible(true);
     }
-  }, [isRunning, elapsedTime, taskId]);
+  }, [isRunning, elapsedTime]);
 
-  // Pause/Resume button logic
-  const handlePauseOrResume = useCallback(async () => {
+  const handlePauseOrResume = useCallback(() => {
     if (isRunning) {
-      // Pause logic
-      try {
-        const currentElapsed =
-          Math.floor((Date.now() - (startTime?.getTime() || 0)) / 1000) +
-          elapsedTime;
-        await todosService.pauseTimer(taskId, currentElapsed);
-        setElapsedTime(currentElapsed);
-        setIsRunning(false);
-        console.log('[PAUSE TIMER] Timer paused successfully.');
-      } catch (error) {
-        console.error('[PAUSE TIMER] Error pausing timer:', error);
-      }
-    } else {
-      // Resume logic
-      try {
-        const response = await todosService.resumeTimer(taskId, elapsedTime);
-        if (response.success) {
-          setStartTime(new Date());
-          setIsRunning(true);
-          console.log('[RESUME TIMER] Timer resumed successfully.');
-        } else {
-          throw new Error(response.message || 'Failed to resume timer.');
-        }
-      } catch (error) {
-        console.error('[RESUME TIMER] Error resuming timer:', error);
-      }
-    }
-  }, [isRunning, elapsedTime, startTime, taskId]);
-
-  // Stop and mark task as done
-  const handleStopAndMarkAsDone = async () => {
-    try {
+      const currentElapsed = elapsedTime + Math.floor((Date.now() - (startTime?.getTime() || 0)) / 1000);
+      setElapsedTime(currentElapsed);
       setIsRunning(false);
-      const endTime = new Date();
-      const duration = startTime
-        ? Math.round((endTime.getTime() - startTime.getTime()) / 1000) +
-          elapsedTime
-        : elapsedTime;
-
-      console.log(
-        '[STOP AND DONE] Stopping timer at:',
-        endTime,
-        'Duration:',
-        duration
-      );
-
-      if (startTime) {
-        await todosService.saveTaskTime(
-          taskId,
-          userId,
-          startTime,
-          endTime,
-          duration
-        );
-      }
-
-      await todosService.taskIsDone(taskId);
-
-      queryClient.invalidateQueries({ queryKey: ['todos'] });
-
-      console.log('[STOP AND DONE] Task marked as done.');
-      // After marking as done, show the default buttons
-      setIsTimerVisible(false);
-    } catch (error) {
-      console.error(
-        '[STOP AND DONE] Error stopping timer and marking as done:',
-        error
-      );
+    } else {
+      setStartTime(new Date());
+      setIsRunning(true);
     }
-  };
+  }, [isRunning, elapsedTime, startTime]);
+
+  const handleStopAndMarkAsDone = useCallback(async () => {
+    setIsRunning(false);
+    const endTime = new Date();
+    const duration =
+      startTime ? Math.floor((endTime.getTime() - startTime.getTime()) / 1000) + elapsedTime : elapsedTime;
+
+    await todosService.saveTaskTime(task.id, userId, startTime || endTime, endTime, duration);
+    await todosService.taskIsDone(task.id);
+    queryClient.invalidateQueries({ queryKey: ["todos"] });
+    setIsTimerVisible(false);
+  }, [startTime, elapsedTime, task.id, userId, queryClient]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (isRunning && startTime) {
       interval = setInterval(() => {
-        const elapsed =
-          Math.floor((Date.now() - startTime.getTime()) / 1000) + elapsedTime;
-        setTime(elapsed);
+        setTime(elapsedTime + Math.floor((Date.now() - startTime.getTime()) / 1000));
       }, 1000);
     }
     return () => clearInterval(interval);
   }, [isRunning, startTime, elapsedTime]);
 
-  useEffect(() => {
-    if (isTimerVisible) {
-      setCursorPointer(true);
-    } else {
-      setCursorPointer(false);
-    }
-  }, [isTimerVisible]);
-
-  const renderButtons = () => {
-    if (isTimerVisible) {
-      return (
-        <>
-          <IconButton onClick={handleStartOrReset}>
-            {isRunning || elapsedTime > 0 ? (
-              <BiReset title="Reset" />
-            ) : (
-              <BiPlay title="Start" />
-            )}
-          </IconButton>
-          <IconButton onClick={handlePauseOrResume}>
-            {isRunning ? <BiPause title="Pause" /> : <BiPlay title="Resume" />}
-          </IconButton>
-          <IconButton onClick={handleStopAndMarkAsDone}>
-            <BiCheck title="Stop and Mark as Done" />
-          </IconButton>
-        </>
-      );
-    }
-
-    return (
-      <>
-        <IconButton onClick={handleStartOrReset}>
-          <BiTimer title="Start" />
-        </IconButton>
-        <IconButton onClick={handleEdit}>
-          <BiEditAlt title="Edit" />
-        </IconButton>
-        <IconButton onClick={onDeleteTask}>
-          <BiSolidTrash title="Trash can" />
-        </IconButton>
-      </>
-    );
-  };
-
   return (
-    <div className={styles.taskItem}>
-      <div className={styles.taskDescription}>
-        <li
-          className={`${styles.taskContainer} ${isEdit ? styles.isEdit : ''} ${
-            task.isDone ? styles.isDone : ''
-          }`}
-          onClick={() => !isEdit && setIsTimerVisible(!isTimerVisible)}
-        >
-          <div className={styles.taskContent}>
-            {/* Render only one: editing input or task description/timer */}
-            {isEdit ? (
-              <TaskInput
-                autoFocus
-                value={inputEdit}
-                onChange={handleChangeInput}
-              />
-            ) : isTimerVisible ? (
-              // Timer Display Mode
-              <div className={styles.timerContainer}>
-                <p className={styles.timerDisplay}>
-                  {String(Math.floor(time / 3600)).padStart(2, '0')}:
-                  {String(Math.floor((time % 3600) / 60)).padStart(2, '0')}:
-                  {String(time % 60).padStart(2, '0')}
-                </p>
-              </div>
-            ) : (
-              // Task Description Mode
-              <div>{task.description}</div>
-            )}
-          </div>
-        </li>
-      </div>
-      <div className={styles.buttons}>
+    <div className="flex justify-between items-center p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all w-full max-w-lg">
+      {/* Task Description or Input */}
+      <div className="flex items-center">
         {isEdit ? (
-          <div className={styles.editButton}>
-            <IconButton onClick={handleSave}>
-              <BiTask title="Accept" />
-            </IconButton>
-            <IconButton onClick={handleCancel}>
-              <BiTaskX title="Undo" />
-            </IconButton>
+          <TaskInput
+            autoFocus
+            value={inputEdit}
+            onChange={handleChangeInput}
+            className="w-full border border-gray-300 rounded-md px-2 py-1 focus:ring focus:ring-blue-300"
+          />
+        ) : isTimerVisible ? (
+          <div className="text-lg font-mono text-gray-800 dark:text-gray-200">
+            {String(Math.floor(time / 3600)).padStart(2, "0")}:
+            {String(Math.floor((time % 3600) / 60)).padStart(2, "0")}:
+            {String(time % 60).padStart(2, "0")}
           </div>
         ) : (
-          renderButtons()
+          <p
+            className={`font-medium ${
+              task.isDone
+                ? "line-through text-gray-500 dark:text-gray-400"
+                : "text-gray-800 dark:text-gray-200"
+            }`}
+          >
+            {task.description}
+          </p>
+        )}
+      </div>
+  
+      {/* Action Buttons */}
+      <div className="flex space-x-2">
+        {isEdit ? (
+          <>
+            <IconButton
+              className="bg-green-500 text-white hover:bg-green-600"
+              onClick={handleSave}
+            >
+              <BiTask title="Save" />
+            </IconButton>
+            <IconButton
+              className="bg-gray-400 text-white hover:bg-gray-500"
+              onClick={handleCancel}
+            >
+              <BiTaskX title="Cancel" />
+            </IconButton>
+          </>
+        ) : isTimerVisible ? (
+          <>
+            <IconButton
+              className="bg-blue-500 text-white hover:bg-blue-600"
+              onClick={handleStartOrReset}
+            >
+              <BiReset title="Reset" />
+            </IconButton>
+            <IconButton
+              className="bg-yellow-400 text-white hover:bg-yellow-500"
+              onClick={handlePauseOrResume}
+            >
+              {isRunning ? <BiPause title="Pause" /> : <BiPlay title="Resume" />}
+            </IconButton>
+            <IconButton
+              className="bg-green-500 text-white hover:bg-green-600"
+              onClick={handleStopAndMarkAsDone}
+            >
+              <BiCheck title="Stop and Mark as Done" />
+            </IconButton>
+          </>
+        ) : (
+          <>
+            <IconButton
+              className="bg-blue-500 text-white hover:bg-blue-600"
+              onClick={handleStartOrReset}
+            >
+              <BiTimer title="Start Timer" />
+            </IconButton>
+            <IconButton
+              className="bg-yellow-400 text-white hover:bg-yellow-500"
+              onClick={handleEdit}
+            >
+              <BiEditAlt title="Edit" />
+            </IconButton>
+            <IconButton
+              className="bg-red-500 text-white hover:bg-red-600"
+              onClick={onDeleteTask}
+            >
+              <BiSolidTrash title="Delete" />
+            </IconButton>
+          </>
         )}
       </div>
     </div>
-  );
+  );  
 };
 
 export default TaskDeck;

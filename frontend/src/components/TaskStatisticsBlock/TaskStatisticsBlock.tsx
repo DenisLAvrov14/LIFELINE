@@ -34,27 +34,29 @@ const TaskStatisticsBlock: React.FC = () => {
   }, []);
 
   return (
-    <section className="my-8 max-w-lg mx-auto">
-      <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">
+    <section className="my-8 max-w-3xl mx-auto bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-lg shadow-lg">
+      <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-6 text-center">
         Task Time Statistics
       </h2>
-      <div className="bg-white shadow-md rounded-lg p-4">
+      <div className="bg-white dark:bg-gray-900 shadow-md rounded-lg p-6">
         <ul className="space-y-4">
           {tasks.map((task, index) => (
             <li
               key={index}
-              className="flex justify-between items-center border-b pb-2 last:border-b-0"
+              className="flex justify-between items-center border-b border-gray-300 dark:border-gray-700 pb-2 last:border-b-0"
             >
-              <span className="text-lg font-medium text-gray-700">
+              <span className="text-lg font-medium text-gray-700 dark:text-gray-300">
                 {task.description}
               </span>
-              <span className="text-lg text-gray-500">{task.time}</span>
+              <span className="text-lg font-medium text-gray-500 dark:text-gray-400">
+                {task.time}
+              </span>
             </li>
           ))}
         </ul>
       </div>
     </section>
-  );
+  );  
 };
 
 export default TaskStatisticsBlock;

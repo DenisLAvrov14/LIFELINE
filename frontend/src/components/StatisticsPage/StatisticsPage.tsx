@@ -33,11 +33,18 @@ const StatisticsPage: React.FC = () => {
   ];
 
   return (
-    <div className={styles.statisticsPage}>
-      <AvatarBlock />
-      <div className={styles.statistics}>
-        <h1>NAME NAME</h1>
-        <div className={styles.container}>
+    <div className="flex flex-col items-center p-6 bg-gray-100 dark:bg-gray-900 min-h-screen text-gray-800 dark:text-gray-200">
+      {/* Блок аватара */}
+      <div className="mb-6">
+        <AvatarBlock />
+      </div>
+  
+      {/* Основной блок статистики */}
+      <div className="w-full max-w-4xl bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6">
+        <h1 className="text-2xl font-bold text-center text-gray-800 dark:text-gray-200 mb-6">
+          NAME NAME
+        </h1>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <ProgressSection
             title="Physical Health and Activity"
             items={healthItems}
@@ -55,10 +62,14 @@ const StatisticsPage: React.FC = () => {
             items={knowledgeItems}
           />
         </div>
-        <TaskStatisticsBlock tasks={taskStatistics} />
+        {/* Блок статистики задач */}
+        <div className="mt-8">
+          <TaskStatisticsBlock />
+        </div>
       </div>
     </div>
   );
+  
 };
 
 export default StatisticsPage;

@@ -1,54 +1,55 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import './Navbar.css';
-import Statistic from '../../modules/Statistic/Statistic';
-import Todo from '../../modules/Todo/Todo';
+import { useState } from "react";
+import Statistic from "../../modules/Statistic/Statistic";
+import Todo from "../../modules/Todo/Todo";
+import ChangeTheme from "../../components/ChangeTheme/ChangeTheme";
 
 const tabs = [
-  { label: 'Todo', icon: '✅', component: <Todo /> },
-  { label: 'Statistic', icon: '📊', component: <Statistic /> },
-  // { label: 'Map', icon: '🗺️', component: <></>},
-  // { label: 'Social', icon: '👥', component: <></> }
+  { label: "Todo", icon: "✅", component: <Todo /> },
+  { label: "Statistic", icon: "📊", component: <Statistic /> },
 ];
 
 const Navbar = () => {
   const [selectedTab, setSelectedTab] = useState(tabs[0]);
 
   return (
-    <>
-      <div className="navbar">
-        <nav>
-          <ul>
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+      {/* Верхняя панель */}
+      <header className="bg-gray-200 dark:bg-gray-800 shadow-md">
+        <div className="flex justify-between items-center px-6 py-3">
+          {/* Навигация */}
+          <nav className="flex space-x-4">
             {tabs.map((item) => (
-              <li
+              <button
                 key={item.label}
-                className={item === selectedTab ? 'selected' : ''}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  item === selectedTab
+                    ? "bg-blue-500 text-white dark:bg-blue-600 font-semibold"
+                    : "bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200"
+                }`}
                 onClick={() => setSelectedTab(item)}
               >
-                <span className="icon">{item.icon}</span>
-                <span className="label">{item.label}</span>
-                {item === selectedTab ? (
-                  <motion.div className="underline" layoutId="underline" />
-                ) : null}
-              </li>
+                <span className="text-xl">{item.icon}</span>
+                <span>{item.label}</span>
+              </button>
             ))}
-          </ul>
-        </nav>
-      </div>
-      <div className="main-content">
-        <motion.div
-          key={selectedTab ? selectedTab.label : 'empty'}
-          initial={{ y: 10, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: -10, opacity: 0 }}
-          transition={{ duration: 0.2 }}
+          </nav>
+  
+          {/* Кнопка смены темы */}
+          <ChangeTheme />
+        </div>
+      </header>
+  
+      {/* Основное содержимое */}
+      <main className="p-6">
+        <div
+          className="animate-fadeIn"
+          key={selectedTab.label}
         >
-          {selectedTab.component}{' '}
-          {/* Замените комментарий на рендеринг соответствующего компонента */}
-        </motion.div>
-      </div>
-    </>
-  );
+          {selectedTab.component}
+        </div>
+      </main>
+    </div>
+  );  
 };
 
 export default Navbar;

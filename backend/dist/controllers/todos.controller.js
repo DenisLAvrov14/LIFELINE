@@ -17,40 +17,40 @@ const db_connection_1 = __importDefault(require("../services/db.connection"));
 // Получение всех задач (Todos)
 const getTodos = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const result = yield db_connection_1.default.query("SELECT * FROM tasks");
+        const result = yield db_connection_1.default.query(`SELECT id, description, "isDone", created_at AS "createdAt" FROM tasks`);
         res.json(result.rows);
     }
     catch (error) {
         console.error("Error fetching todos:", error.message);
-        res.status(500).send(error.message);
+        res.status(500).send("Error fetching todos: " + error.message);
     }
 });
 exports.getTodos = getTodos;
 // Создание новой задачи (Todo)
 const createTodo = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { description, is_done = false } = req.body; // Устанавливаем значение по умолчанию для is_done
+    const { description, isDone = false } = req.body;
     try {
-        const result = yield db_connection_1.default.query(`INSERT INTO tasks (description, is_done) 
+        const result = yield db_connection_1.default.query(`INSERT INTO tasks (description, "isDone") 
        VALUES ($1, $2) 
-       RETURNING id, description, is_done AS "isDone", created_at AS "createdAt"`, [description, is_done]);
+       RETURNING id, description, "isDone", created_at AS "createdAt"`, [description, isDone]);
         res.status(201).json(result.rows[0]);
     }
     catch (error) {
         console.error("Error creating todo:", error.message);
-        res.status(500).send(error.message);
+        res.status(500).send("Error creating todo: " + error.message);
     }
 });
 exports.createTodo = createTodo;
 // Обновление задачи (Todo)
 const updateTodo = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    const { description, is_done } = req.body;
-    console.log("Updating todo with ID:", id, "Description:", description, "Is Done:", is_done);
+    const { description, isDone } = req.body; // Используем isDone
+    console.log("Updating todo with ID:", id, "Description:", description, "Is Done:", isDone);
     try {
         const result = yield db_connection_1.default.query(`UPDATE tasks 
-       SET description = $1, is_done = $2 
+       SET description = $1, "isDone" = $2 
        WHERE id = $3 
-       RETURNING id, description, is_done AS "isDone", created_at AS "createdAt"`, [description, is_done, id]);
+       RETURNING id, description, "isDone" AS "isDone", created_at AS "createdAt"`, [description, isDone, id]);
         if (result.rowCount === 0) {
             return res.status(404).json({ message: "Todo not found" });
         }
@@ -72,7 +72,7 @@ const deleteTodo = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
     catch (error) {
         console.error("Error deleting todo:", error.message);
-        res.status(500).send(error.message);
+        res.status(500).send("Error deleting todo: " + error.message);
     }
 });
 exports.deleteTodo = deleteTodo;

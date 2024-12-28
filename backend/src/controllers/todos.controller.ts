@@ -4,47 +4,48 @@ import pool from "../services/db.connection";
 // Получение всех задач (Todos)
 export const getTodos = async (req: Request, res: Response) => {
   try {
-    const result = await pool.query("SELECT * FROM tasks");
+    const result = await pool.query(
+      `SELECT id, description, "isDone", created_at AS "createdAt" FROM tasks`
+    );
     res.json(result.rows);
   } catch (error: any) {
     console.error("Error fetching todos:", error.message);
-    res.status(500).send(error.message);
+    res.status(500).send("Error fetching todos: " + error.message);
   }
 };
 
 // Создание новой задачи (Todo)
 export const createTodo = async (req: Request, res: Response) => {
-  const { description, is_done = false } = req.body; // Устанавливаем значение по умолчанию для is_done
+  const { description, isDone = false } = req.body;
 
   try {
     const result = await pool.query(
-      `INSERT INTO tasks (description, is_done) 
+      `INSERT INTO tasks (description, "isDone") 
        VALUES ($1, $2) 
-       RETURNING id, description, is_done AS "isDone", created_at AS "createdAt"`,
-      [description, is_done]
+       RETURNING id, description, "isDone", created_at AS "createdAt"`,
+      [description, isDone]
     );
-
     res.status(201).json(result.rows[0]);
   } catch (error: any) {
     console.error("Error creating todo:", error.message);
-    res.status(500).send(error.message);
+    res.status(500).send("Error creating todo: " + error.message);
   }
 };
 
 // Обновление задачи (Todo)
 export const updateTodo = async (req: Request, res: Response) => {
   const { id } = req.params;
-  const { description, is_done } = req.body;
+  const { description, isDone } = req.body; // Используем isDone
 
-  console.log("Updating todo with ID:", id, "Description:", description, "Is Done:", is_done);
+  console.log("Updating todo with ID:", id, "Description:", description, "Is Done:", isDone);
 
   try {
     const result = await pool.query(
       `UPDATE tasks 
-       SET description = $1, is_done = $2 
+       SET description = $1, "isDone" = $2 
        WHERE id = $3 
-       RETURNING id, description, is_done AS "isDone", created_at AS "createdAt"`,
-      [description, is_done, id]
+       RETURNING id, description, "isDone" AS "isDone", created_at AS "createdAt"`,
+      [description, isDone, id]
     );
 
     if (result.rowCount === 0) {
@@ -67,6 +68,6 @@ export const deleteTodo = async (req: Request, res: Response) => {
     res.sendStatus(204);
   } catch (error: any) {
     console.error("Error deleting todo:", error.message);
-    res.status(500).send(error.message);
+    res.status(500).send("Error deleting todo: " + error.message);
   }
 };

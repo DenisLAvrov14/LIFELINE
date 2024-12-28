@@ -12,11 +12,11 @@ export const getTodos = async () => {
   }
 };
 
-export const addTodo = async (description: string, is_done: boolean) => {
+export const addTodo = async (description: string, isDone: boolean) => {
   try {
     const response = await axios.post(`${API_URL}/tasks`, {
       description,
-      is_done,
+      isDone,
     });
     return response.data;
   } catch (error) {
@@ -28,12 +28,12 @@ export const addTodo = async (description: string, is_done: boolean) => {
 export const updateTodo = async (
   id: string,
   description: string,
-  is_done: boolean
+  isDone: boolean
 ) => {
   try {
     const response = await axios.put(`${API_URL}/todos/${id}`, {
       description,
-      is_done,
+      isDone,
     });
     return response.data;
   } catch (error) {

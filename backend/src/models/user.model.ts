@@ -1,7 +1,7 @@
 import pool from "../services/db.connection";
 
 export interface User {
-  id?: string; // UUID 
+  id?: string; // UUID
   username: string;
   email: string;
 }

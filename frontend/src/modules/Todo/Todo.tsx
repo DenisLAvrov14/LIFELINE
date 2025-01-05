@@ -1,9 +1,9 @@
-import React, { useMemo } from "react";
-import { useTodos } from "../../hooks/useTodos";
-import { Task } from "../../models/Task";
-import TaskDeck from "../../components/TaskDeck/TaskDeck";
-import { RootState, useSelector } from "../../redux/store";
-import CreateTask from "../../components/CreateTask/CraeteTask";
+import React, { useMemo } from 'react';
+import { useTodos } from '../../hooks/useTodos';
+import { Task } from '../../models/Task';
+import TaskDeck from '../../components/TaskDeck/TaskDeck';
+import { RootState, useSelector } from '../../redux/store';
+import CreateTask from '../../components/CreateTask/CraeteTask';
 
 const Todo: React.FC = () => {
   const filter = useSelector((state: RootState) => state.tasks.filter);
@@ -15,11 +15,11 @@ const Todo: React.FC = () => {
     if (!queryData) return [];
 
     switch (filter) {
-      case "all":
+      case 'all':
         return queryData;
-      case "done":
+      case 'done':
         return queryData.filter((task: Task) => task.isDone === true);
-      case "undone":
+      case 'undone':
         return queryData.filter((task: Task) => task.isDone === false);
       default:
         return [];
@@ -32,7 +32,7 @@ const Todo: React.FC = () => {
       <div className="w-full max-w-3xl mb-8">
         <CreateTask />
       </div>
-  
+
       {/* Список задач */}
       <div className="w-full max-w-3xl">
         {isLoading ? (
@@ -52,7 +52,7 @@ const Todo: React.FC = () => {
         )}
       </div>
     </div>
-  );  
+  );
 };
 
 export default Todo;

@@ -1,17 +1,22 @@
-import { useState, useEffect } from "react";
-import Statistic from "../../modules/Statistic/Statistic";
-import Todo from "../../modules/Todo/Todo";
-import ChangeTheme from "../../components/ChangeTheme/ChangeTheme";
+import { useState, useEffect } from 'react';
+import Statistic from '../../modules/Statistic/Statistic';
+import Todo from '../../modules/Todo/Todo';
+import ChangeTheme from '../../components/ChangeTheme/ChangeTheme';
 
 const tabs = [
-  { label: "Todo", icon: "✅", component: <Todo />, key: "todo" },
-  { label: "Statistic", icon: "📊", component: <Statistic />, key: "statistic" },
+  { label: 'Todo', icon: '✅', component: <Todo />, key: 'todo' },
+  {
+    label: 'Statistic',
+    icon: '📊',
+    component: <Statistic />,
+    key: 'statistic',
+  },
 ];
 
 const Navbar = () => {
   // Считываем последнюю открытую вкладку из localStorage
   const [selectedTabKey, setSelectedTabKey] = useState(
-    () => localStorage.getItem("selectedTabKey") || "todo"
+    () => localStorage.getItem('selectedTabKey') || 'todo'
   );
 
   // Определяем выбранную вкладку на основе ключа
@@ -19,13 +24,13 @@ const Navbar = () => {
 
   const handleTabClick = (key: string) => {
     setSelectedTabKey(key);
-    localStorage.setItem("selectedTabKey", key); // Сохраняем выбор в localStorage
+    localStorage.setItem('selectedTabKey', key); // Сохраняем выбор в localStorage
   };
 
   useEffect(() => {
     // Проверяем, что ключ корректный, если нет — переключаемся на первую вкладку
     if (!tabs.some((tab) => tab.key === selectedTabKey)) {
-      setSelectedTabKey("todo");
+      setSelectedTabKey('todo');
     }
   }, [selectedTabKey]);
 
@@ -41,8 +46,8 @@ const Navbar = () => {
                 key={item.key}
                 className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                   item.key === selectedTabKey
-                    ? "bg-blue-500 text-white dark:bg-blue-600 font-semibold"
-                    : "bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200"
+                    ? 'bg-blue-500 text-white dark:bg-blue-600 font-semibold'
+                    : 'bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200'
                 }`}
                 onClick={() => handleTabClick(item.key)}
               >

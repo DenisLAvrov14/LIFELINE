@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 type Props = {
   imageUrl?: string; // Необязательное изображение
@@ -10,8 +10,8 @@ const AvatarBlock: React.FC<Props> = ({ imageUrl }) => {
       className={`w-24 h-24 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center overflow-hidden`}
       style={{
         backgroundImage: imageUrl ? `url(${imageUrl})` : undefined,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
       }}
     >
       {!imageUrl && (
@@ -19,7 +19,6 @@ const AvatarBlock: React.FC<Props> = ({ imageUrl }) => {
       )}
     </div>
   );
-  
 };
 
 export default AvatarBlock;

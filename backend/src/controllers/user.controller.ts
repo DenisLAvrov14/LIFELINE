@@ -1,5 +1,5 @@
-import { Request, Response } from 'express';
-import { createUser as createUserModel } from '../models/user.model';
+import { Request, Response } from "express";
+import { createUser as createUserModel } from "../models/user.model";
 
 export const createUser = async (req: Request, res: Response) => {
   const newUser = req.body;

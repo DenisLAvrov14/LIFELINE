@@ -1,5 +1,5 @@
-import React from "react";
-import { Props } from "../../models/ProgressItem";
+import React from 'react';
+import { Props } from '../../models/ProgressItem';
 
 const ProgressSection: React.FC<Props> = ({ title, items }) => {
   return (
@@ -9,10 +9,7 @@ const ProgressSection: React.FC<Props> = ({ title, items }) => {
       </h2>
       <ul className="space-y-6">
         {items.map((item, index) => (
-          <li
-            key={index}
-            className="flex items-center space-x-4"
-          >
+          <li key={index} className="flex items-center space-x-4">
             <span className="w-1/4 text-gray-700 dark:text-gray-300 font-medium">
               {item.label}
             </span>
@@ -27,7 +24,7 @@ const ProgressSection: React.FC<Props> = ({ title, items }) => {
         ))}
       </ul>
     </section>
-  );  
+  );
 };
 
 export default ProgressSection;

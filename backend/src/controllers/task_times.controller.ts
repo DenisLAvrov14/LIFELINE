@@ -11,7 +11,13 @@ import pool from "../services/db.connection";
 export const createTaskTimeController = async (req: Request, res: Response) => {
   const { task_id, user_id, start_time, end_time, duration } = req.body;
 
-  console.log("Received data:", { task_id, user_id, start_time, end_time, duration });
+  console.log("Received data:", {
+    task_id,
+    user_id,
+    start_time,
+    end_time,
+    duration,
+  });
 
   if (!task_id || !user_id || !start_time || (!duration && duration !== 0)) {
     return res.status(400).send("Invalid data: Missing required fields");
@@ -42,48 +48,60 @@ export const updateTaskTimeController = async (req: Request, res: Response) => {
   const { id, task_id, user_id, start_time, end_time, duration } = req.body;
 
   try {
-      if (!start_time || isNaN(new Date(start_time).getTime())) {
-          return res.status(400).send("Invalid start_time format");
-      }
+    if (!start_time || isNaN(new Date(start_time).getTime())) {
+      return res.status(400).send("Invalid start_time format");
+    }
 
-      const updateFields = {
-          start_time: new Date(start_time).toISOString(),
-          duration,
-          end_time: end_time ? new Date(end_time).toISOString() : null,
-      };
+    const updateFields = {
+      start_time: new Date(start_time).toISOString(),
+      duration,
+      end_time: end_time ? new Date(end_time).toISOString() : null,
+    };
 
-      console.log("Updating task time:", { id, task_id, user_id, ...updateFields });
+    console.log("Updating task time:", {
+      id,
+      task_id,
+      user_id,
+      ...updateFields,
+    });
 
-      await updateTaskTimeModel({ id, task_id, user_id, ...updateFields });
+    await updateTaskTimeModel({ id, task_id, user_id, ...updateFields });
 
-      res.status(200).json({ message: "Task time updated successfully" });
+    res.status(200).json({ message: "Task time updated successfully" });
   } catch (error: any) {
-      console.error("Error updating task time:", error.message);
-      res.status(500).send(`Error updating task time: ${error.message}`);
+    console.error("Error updating task time:", error.message);
+    res.status(500).send(`Error updating task time: ${error.message}`);
   }
 };
 
 // Контроллер для обновления статуса таймера (пауза/возобновление)
-export const updateTimerStatusController = async (req: Request, res: Response) => {
+export const updateTimerStatusController = async (
+  req: Request,
+  res: Response,
+) => {
   const { task_id, elapsed_time, is_running } = req.body;
 
   try {
-      if (!task_id || elapsed_time === undefined || is_running === undefined) {
-          return res.status(400).send("Invalid data: Missing required fields");
-      }
+    if (!task_id || elapsed_time === undefined || is_running === undefined) {
+      return res.status(400).send("Invalid data: Missing required fields");
+    }
 
-      console.log("Updating timer status:", { task_id, elapsed_time, is_running });
+    console.log("Updating timer status:", {
+      task_id,
+      elapsed_time,
+      is_running,
+    });
 
-      await updateTimerModel({
-          task_id,
-          elapsed_time: Math.round(elapsed_time),
-          is_running,
-      });
+    await updateTimerModel({
+      task_id,
+      elapsed_time: Math.round(elapsed_time),
+      is_running,
+    });
 
-      res.status(200).json({ message: "Timer status updated successfully" });
+    res.status(200).json({ message: "Timer status updated successfully" });
   } catch (error: any) {
-      console.error("Error updating timer status:", error.message);
-      res.status(500).send(`Error updating timer status: ${error.message}`);
+    console.error("Error updating timer status:", error.message);
+    res.status(500).send(`Error updating timer status: ${error.message}`);
   }
 };
 
@@ -94,17 +112,22 @@ export const markTaskAsDone = async (req: Request, res: Response) => {
   try {
     const result = await pool.query(
       `UPDATE tasks SET "isDone" = TRUE WHERE id = $1 RETURNING id, description, "isDone", created_at AS "createdAt"`,
-      [id]
+      [id],
     );
 
     if (result.rowCount === 0) {
-      return res.status(404).json({ success: false, message: "Task not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Task not found" });
     }
 
     res.status(200).json({ success: true, task: result.rows[0] });
   } catch (error: any) {
     console.error("Error marking task as done:", error.message);
-    res.status(500).json({ success: false, message: `Error marking task as done: ${error.message}` });
+    res.status(500).json({
+      success: false,
+      message: `Error marking task as done: ${error.message}`,
+    });
   }
 };
 
@@ -129,7 +152,7 @@ export const getTimerStatus = async (req: Request, res: Response) => {
   try {
     const { rows } = await pool.query(
       "SELECT * FROM task_times WHERE task_id = $1 ORDER BY start_time DESC LIMIT 1",
-      [taskId]
+      [taskId],
     );
 
     if (rows.length === 0) {
@@ -203,7 +226,7 @@ export const updateTimerController = async (req: Request, res: Response) => {
     const roundedElapsedTime = Math.round(elapsed_time);
     await pool.query(
       `UPDATE task_times SET duration = $1, end_time = $2 WHERE task_id = $3 AND end_time IS NULL`,
-      [roundedElapsedTime, endTime, task_id]
+      [roundedElapsedTime, endTime, task_id],
     );
 
     res.status(200).json({ message: "Timer updated successfully" });

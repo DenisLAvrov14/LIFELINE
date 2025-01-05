@@ -1,6 +1,5 @@
-export type TaskStatisticBlock = {
-    // name: string;
-    time: string;
-    description: string;
-  };
-  
+export interface TaskStatisticBlock {
+  description: string;
+  time: number;
+  date?: string; // Убедитесь, что тип соответствует формату даты
+}

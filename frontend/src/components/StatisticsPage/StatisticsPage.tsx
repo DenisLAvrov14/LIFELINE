@@ -1,35 +1,35 @@
-import React from "react";
-import styles from "./StatisticsPage.module.css";
-import AvatarBlock from "../AvatarBlock/AvatarBlock";
-import ProgressSection from "../ProgressSection/ProgressSection";
-import TaskStatisticsBlock from "../TaskStatisticsBlock/TaskStatisticsBlock";
+import React from 'react';
+import styles from './StatisticsPage.module.css';
+import AvatarBlock from '../AvatarBlock/AvatarBlock';
+import ProgressSection from '../ProgressSection/ProgressSection';
+import TaskStatisticsBlock from '../TaskStatisticsBlock/TaskStatisticsBlock';
 
 const StatisticsPage: React.FC = () => {
   const healthItems = [
-    { label: "Health", value: 70 },
-    { label: "Fitness", value: 50 },
+    { label: 'Health', value: 70 },
+    { label: 'Fitness', value: 50 },
   ];
 
   const intellectualItems = [
-    { label: "Intelligence", value: 80 },
-    { label: "Creativity", value: 60 },
+    { label: 'Intelligence', value: 80 },
+    { label: 'Creativity', value: 60 },
   ];
 
   const socialItems = [
-    { label: "Social Ability", value: 90 },
-    { label: "Community Contribution", value: 40 },
-    { label: "Environmental Responsibility", value: 30 },
+    { label: 'Social Ability', value: 90 },
+    { label: 'Community Contribution', value: 40 },
+    { label: 'Environmental Responsibility', value: 30 },
   ];
 
   const knowledgeItems = [
-    { label: "Specialized Knowledge", value: 75 },
-    { label: "Foreign Language Proficiency", value: 85 },
+    { label: 'Specialized Knowledge', value: 75 },
+    { label: 'Foreign Language Proficiency', value: 85 },
   ];
 
   const taskStatistics = [
-    { name: "Task 1", time: "2h 30m" },
-    { name: "Task 2", time: "1h 15m" },
-    { name: "Task 3", time: "3h 45m" },
+    { name: 'Task 1', time: '2h 30m' },
+    { name: 'Task 2', time: '1h 15m' },
+    { name: 'Task 3', time: '3h 45m' },
   ];
 
   return (
@@ -38,7 +38,7 @@ const StatisticsPage: React.FC = () => {
       <div className="mb-6">
         <AvatarBlock />
       </div>
-  
+
       {/* Основной блок статистики */}
       <div className="w-full max-w-4xl bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6">
         <h1 className="text-2xl font-bold text-center text-gray-800 dark:text-gray-200 mb-6">
@@ -69,7 +69,6 @@ const StatisticsPage: React.FC = () => {
       </div>
     </div>
   );
-  
 };
 
 export default StatisticsPage;

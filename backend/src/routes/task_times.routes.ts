@@ -28,11 +28,10 @@ router.post("/start", startTimerController);
 // Завершение задачи
 router.put("/tasks/:id/done", markTaskAsDone);
 
-// Продолжить работу таймера 
-router.post('/resume', (req, res) => {
-  console.log('Request body:', req.body);
-  res.status(200).send({ success: true, message: 'Resume route works!' });
+// Продолжить работу таймера
+router.post("/resume", (req, res) => {
+  console.log("Request body:", req.body);
+  res.status(200).send({ success: true, message: "Resume route works!" });
 });
-
 
 export default router;

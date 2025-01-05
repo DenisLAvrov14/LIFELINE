@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { 
+import {
   startTimerController,
   updateTimerStatusController,
   getTimerStatus,
-  stopTimerController
+  stopTimerController,
 } from "../controllers/task_times.controller";
 
 const router = Router();

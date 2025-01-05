@@ -5,7 +5,7 @@ import pool from "../services/db.connection";
 export const getTodos = async (req: Request, res: Response) => {
   try {
     const result = await pool.query(
-      `SELECT id, description, "isDone", created_at AS "createdAt" FROM tasks`
+      `SELECT id, description, "isDone", created_at AS "createdAt" FROM tasks`,
     );
     res.json(result.rows);
   } catch (error: any) {
@@ -23,7 +23,7 @@ export const createTodo = async (req: Request, res: Response) => {
       `INSERT INTO tasks (description, "isDone") 
        VALUES ($1, $2) 
        RETURNING id, description, "isDone", created_at AS "createdAt"`,
-      [description, isDone]
+      [description, isDone],
     );
     res.status(201).json(result.rows[0]);
   } catch (error: any) {
@@ -37,7 +37,14 @@ export const updateTodo = async (req: Request, res: Response) => {
   const { id } = req.params;
   const { description, isDone } = req.body; // Используем isDone
 
-  console.log("Updating todo with ID:", id, "Description:", description, "Is Done:", isDone);
+  console.log(
+    "Updating todo with ID:",
+    id,
+    "Description:",
+    description,
+    "Is Done:",
+    isDone,
+  );
 
   try {
     const result = await pool.query(
@@ -45,7 +52,7 @@ export const updateTodo = async (req: Request, res: Response) => {
        SET description = $1, "isDone" = $2 
        WHERE id = $3 
        RETURNING id, description, "isDone" AS "isDone", created_at AS "createdAt"`,
-      [description, isDone, id]
+      [description, isDone, id],
     );
 
     if (result.rowCount === 0) {

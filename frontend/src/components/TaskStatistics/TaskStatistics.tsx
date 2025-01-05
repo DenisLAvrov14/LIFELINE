@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import styles from "./TaskStatistics.module.css"; // Создайте файл стилей, если нужно.
-import { TaskStat } from "../../models/TaskStat";
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import styles from './TaskStatistics.module.css'; // Создайте файл стилей, если нужно.
+import { TaskStat } from '../../models/TaskStat';
 
 const TaskStatistics: React.FC = () => {
   const [stats, setStats] = useState<TaskStat[]>([]);
@@ -11,15 +11,15 @@ const TaskStatistics: React.FC = () => {
   useEffect(() => {
     const fetchStatistics = async () => {
       try {
-        const userId = "00000000-0000-0000-0000-000000000001"; // Используем ваш userId
-        const response = await axios.get("http://localhost:3001/statistics", {
+        const userId = '00000000-0000-0000-0000-000000000001'; // Используем ваш userId
+        const response = await axios.get('http://localhost:3001/statistics', {
           params: { userId },
         });
         setStats(response.data);
         setIsLoading(false);
       } catch (err) {
-        console.error("Error fetching statistics:", err);
-        setError("Failed to fetch statistics. Please try again later.");
+        console.error('Error fetching statistics:', err);
+        setError('Failed to fetch statistics. Please try again later.');
         setIsLoading(false);
       }
     };

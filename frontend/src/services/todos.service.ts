@@ -12,26 +12,15 @@ export const getTodos = async () => {
   }
 };
 
-export const addTodo = async (description: string, isDone: boolean) => {
-  try {
-    const response = await axios.post(`${API_URL}/tasks`, {
-      description,
-      isDone,
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Error adding todo:', error);
-    throw error;
-  }
-};
-
 export const updateTodo = async (
   id: string,
+  userId: string,
   description: string,
   isDone: boolean
 ) => {
   try {
     const response = await axios.put(`${API_URL}/todos/${id}`, {
+      userId, // Передаем userId для возможного обновления
       description,
       isDone,
     });
@@ -61,12 +50,14 @@ export const createUser = async (username: string, email: string) => {
   }
 };
 
-export const createTask = async (description: string) => {
+export const createTask = async (description: string, userId: string) => {
   try {
     const response = await axios.post(`${API_URL}/tasks`, {
       description,
       is_done: false,
+      userId, // Передаем userId
     });
+    console.log('Task created successfully!');
     return response.data;
   } catch (error) {
     console.error('Error creating task:', error);
@@ -112,10 +103,10 @@ export const getTaskTimes = async (userId: string) => {
   }
 };
 
-export const taskIsDone = async (taskId: string) => {
+export const taskIsDone = async (taskId: string, userId: string) => {
   try {
     const response = await axios.put(`${API_URL}/tasks/${taskId}/done`, {
-      is_done: true,
+      userId,
     });
     return response.data;
   } catch (error) {
@@ -253,9 +244,24 @@ export const getTimerStatus = async (taskId: string) => {
   }
 };
 
+export const getWeeklyStats = async (userId: string) => {
+  try {
+    const response = await axios.get(`${API_URL}/statistics/weekly-stats`, {
+      params: { userId },
+    });
+    return response.data;
+  } catch (error) {
+    const err = error as AxiosError;
+    console.error(
+      'Error fetching weekly stats:',
+      err.response?.data || err.message
+    );
+    throw err;
+  }
+};
+
 const todosService = {
   getTodos,
-  addTodo,
   updateTodo,
   deleteTodo,
   createUser,
@@ -270,6 +276,7 @@ const todosService = {
   getTimerStatus,
   pauseTimer,
   resumeTimer,
+  getWeeklyStats,
 };
 
 export default todosService;

@@ -1,5 +1,5 @@
-import { Pool } from 'pg';
-import { dbConfig } from '../config/db.config';
+import { Pool } from "pg";
+import { dbConfig } from "../config/db.config";
 
 export const connection = new Pool({
   host: dbConfig.HOST,
@@ -12,9 +12,9 @@ export const connection = new Pool({
 export const connectDatabase = async () => {
   try {
     await connection.connect();
-    console.log('Successfully connected to the PostgreSQL database.');
+    console.log("Successfully connected to the PostgreSQL database.");
   } catch (error) {
-    console.error('Error connecting to the PostgreSQL database:', error);
+    console.error("Error connecting to the PostgreSQL database:", error);
     throw error;
   }
 };

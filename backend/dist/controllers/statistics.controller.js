@@ -55,18 +55,18 @@ const getFilteredStats = (req, res) =>
       // SQL-запрос (убран временной диапазон)
       const query = `
       SELECT 
-    description,
-    COUNT(*) AS task_count,
-    SUM(total_time) AS total_time,
-    MAX(completed_at) AS last_completed_at
-FROM 
-    completed_tasks
-WHERE 
-    user_id = $1::uuid
-GROUP BY 
-    description
-ORDER BY 
-    last_completed_at DESC;
+          description,
+          COUNT(*) AS task_count,
+          SUM(total_time) AS total_time,
+          MAX(completed_at) AS last_completed_at
+      FROM 
+          completed_tasks
+      WHERE 
+          user_id = $1::uuid
+      GROUP BY 
+          description
+      ORDER BY 
+          last_completed_at DESC;
 
     `;
       // Выполнение запроса

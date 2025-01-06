@@ -1,10 +1,11 @@
 import React, { useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getFilteredStats } from '../../services/todos.service';
 
 const TaskStatisticsBlock: React.FC = () => {
   const [filter, setFilter] = useState<'day' | 'week' | 'month' | 'all'>('all');
   const userId = '00000000-0000-0000-0000-000000000001';
+  const queryClient = useQueryClient();
 
   const getDateRange = () => {
     const now = new Date();
@@ -35,7 +36,7 @@ const TaskStatisticsBlock: React.FC = () => {
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ['filteredStats', userId],
+    queryKey: ['todos', userId], // Унифицированный ключ
     queryFn: () => getFilteredStats(userId),
     refetchOnWindowFocus: true,
     staleTime: 60000,

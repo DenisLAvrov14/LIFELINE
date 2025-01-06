@@ -1,5 +1,4 @@
 import React from 'react';
-import styles from './StatisticsPage.module.css';
 import AvatarBlock from '../AvatarBlock/AvatarBlock';
 import ProgressSection from '../ProgressSection/ProgressSection';
 import TaskStatisticsBlock from '../TaskStatisticsBlock/TaskStatisticsBlock';

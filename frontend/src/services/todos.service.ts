@@ -244,7 +244,7 @@ export const getTimerStatus = async (taskId: string) => {
   }
 };
 
-export const getWeeklyStats = async (userId: string) => {
+export const getFilteredStats = async (userId: string) => {
   try {
     const response = await axios.get(`${API_URL}/statistics/weekly-stats`, {
       params: { userId },
@@ -253,7 +253,7 @@ export const getWeeklyStats = async (userId: string) => {
   } catch (error) {
     const err = error as AxiosError;
     console.error(
-      'Error fetching weekly stats:',
+      'Error fetching filtered stats:',
       err.response?.data || err.message
     );
     throw err;
@@ -276,7 +276,7 @@ const todosService = {
   getTimerStatus,
   pauseTimer,
   resumeTimer,
-  getWeeklyStats,
+  getFilteredStats,
 };
 
 export default todosService;

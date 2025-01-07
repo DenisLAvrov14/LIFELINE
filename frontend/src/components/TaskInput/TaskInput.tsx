@@ -10,7 +10,7 @@ export const TaskInput: FC<Props> = ({ type = 'text', className, ...rest }) => {
     <input
       type={type}
       className={cx(
-        'border border-gray-300 rounded-md px-3 py-2 text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow',
+        'block max-w-md w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 text-sm text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all',
         className
       )}
       {...rest}

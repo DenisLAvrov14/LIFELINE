@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import styles from './Timer.module.css';
 import { TimerProps } from '../../models/Timer';
 import todosService from '../../services/todos.service';
 
@@ -91,26 +90,39 @@ const Timer: React.FC<TimerProps> = ({ taskId, onSaveTime }) => {
   };
 
   return (
-    <div className={styles.timerContainer}>
-      <p className={styles.timerDisplay}>
-        {new Date(time * 1000).toISOString().substr(11, 8)}{' '}
-        {/* Отображение в формате HH:MM:SS */}
+    <div className="flex flex-col items-center bg-gray-50 dark:bg-gray-800 p-4 rounded-lg shadow-md w-full max-w-md mx-auto">
+      {/* Дисплей таймера */}
+      <p className="text-3xl font-mono text-gray-800 dark:text-gray-200 mb-4">
+        {new Date(time * 1000).toISOString().substr(11, 8)}
       </p>
-      <div className={styles.timerButtons}>
-        <button className={styles.timerButton} onClick={handleStart}>
+
+      {/* Кнопки управления таймером */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <button
+          className="px-4 py-2 bg-green-500 text-white rounded-lg shadow hover:bg-green-600 focus:outline-none focus:ring focus:ring-green-300 transition"
+          onClick={handleStart}
+        >
           Start
         </button>
         <button
-          className={styles.timerButton}
+          className={`px-4 py-2 bg-yellow-500 text-white rounded-lg shadow hover:bg-yellow-600 focus:outline-none focus:ring focus:ring-yellow-300 transition ${
+            !isRunning ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
           onClick={handlePause}
           disabled={!isRunning}
         >
           Pause
         </button>
-        <button className={styles.timerButton} onClick={handleStop}>
+        <button
+          className="px-4 py-2 bg-red-500 text-white rounded-lg shadow hover:bg-red-600 focus:outline-none focus:ring focus:ring-red-300 transition"
+          onClick={handleStop}
+        >
           Stop
         </button>
-        <button className={styles.timerButton} onClick={handleReset}>
+        <button
+          className="px-4 py-2 bg-gray-500 text-white rounded-lg shadow hover:bg-gray-600 focus:outline-none focus:ring focus:ring-gray-300 transition"
+          onClick={handleReset}
+        >
           Reset
         </button>
       </div>

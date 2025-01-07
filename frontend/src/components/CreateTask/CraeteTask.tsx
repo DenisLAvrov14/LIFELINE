@@ -80,32 +80,36 @@ const CreateTask: React.FC = () => {
   );
 
   return (
-    <div className="flex flex-col items-center p-6 dark:bg-gray">
+    <div className="flex flex-col items-center px-4 py-6 sm:px-6 lg:px-8 dark:bg-gray">
       <div className="w-full max-w-lg">
         {/* Заголовок */}
         <h2 className="text-3xl font-bold text-center text-gray-800 dark:text-gray-200 mb-6">
           TO DO LIST
         </h2>
+
         {/* Поле ввода задач */}
-        <div className="flex items-center space-x-4 bg-white dark:bg-gray-800 p-4 shadow-md rounded-lg">
+        <div className="grid grid-cols-1 sm:grid-cols-[3fr_auto_auto] gap-4 bg-white dark:bg-gray-800 p-4 shadow-md rounded-lg">
           <input
             type="text"
             placeholder="Enter your task"
             value={taskDescription}
             onChange={handleInputChange}
-            className="flex-grow border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-gray-700 dark:text-gray-200 bg-gray-50 dark:bg-gray-700 focus:outline-none focus:ring focus:ring-blue-500"
+            className="w-full sm:w-auto border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-gray-700 dark:text-gray-200 bg-gray-50 dark:bg-gray-700 focus:outline-none focus:ring focus:ring-blue-500"
+            aria-label="Task input"
             autoFocus
           />
           <button
             onClick={handleAddTask}
             className="flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white rounded-lg px-4 py-2 transition focus:outline-none focus:ring focus:ring-blue-300"
+            aria-label="Add task"
           >
             <BiSolidPlusCircle title="Add task" size={24} />
           </button>
           <select
             onChange={handleFilterChange}
             value={filterValue}
-            className="border border-gray-300 dark:border-gray-600 rounded-lg px-2 py-2 text-gray-700 dark:text-gray-200 bg-gray-50 dark:bg-gray-700 focus:outline-none focus:ring focus:ring-blue-500"
+            className="w-full sm:w-auto border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-gray-700 dark:text-gray-200 bg-gray-50 dark:bg-gray-700 focus:outline-none focus:ring focus:ring-blue-500"
+            aria-label="Filter tasks"
           >
             <option value="all">All</option>
             <option value="done">Done</option>

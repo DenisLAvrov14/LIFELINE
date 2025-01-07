@@ -10,7 +10,6 @@ import {
   BiReset,
   BiTimer,
 } from 'react-icons/bi';
-import styles from './TaskDeck.module.css';
 import { Task } from '../../models/Task';
 import { TaskInput } from '../../components/TaskInput/TaskInput';
 import { IconButton } from '../../components/IconButton/IconButton';
@@ -160,15 +159,15 @@ const TaskDeck: React.FC<Props> = ({ task }) => {
   }, [isRunning, startTime, elapsedTime]);
 
   return (
-    <div className="flex justify-between items-center p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all w-full max-w-lg">
+    <div className="flex flex-col md:flex-row justify-between items-center p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all w-full max-w-lg space-y-4 md:space-y-0 md:space-x-4 relative">
       {/* Task Description or Input */}
-      <div className="flex items-center">
+      <div className="flex-grow text-center md:text-left">
         {isEdit ? (
           <TaskInput
             autoFocus
             value={inputEdit}
             onChange={handleChangeInput}
-            className="w-full border border-gray-300 rounded-md px-2 py-1 focus:ring focus:ring-blue-300"
+            className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1 focus:ring focus:ring-blue-300"
           />
         ) : isTimerVisible ? (
           <div className="text-lg font-mono text-gray-800 dark:text-gray-200">
@@ -190,17 +189,17 @@ const TaskDeck: React.FC<Props> = ({ task }) => {
       </div>
 
       {/* Action Buttons */}
-      <div className="flex space-x-2">
+      <div className="flex flex-wrap justify-center md:justify-end gap-2 relative z-10">
         {isEdit ? (
           <>
             <IconButton
-              className="bg-green-500 text-white hover:bg-green-600"
+              className="bg-green-500 text-white hover:bg-green-600 pointer-events-auto"
               onClick={handleSave}
             >
               <BiTask title="Save" />
             </IconButton>
             <IconButton
-              className="bg-gray-400 text-white hover:bg-gray-500"
+              className="bg-gray-400 text-white hover:bg-gray-500 pointer-events-auto"
               onClick={handleCancel}
             >
               <BiTaskX title="Cancel" />
@@ -209,13 +208,13 @@ const TaskDeck: React.FC<Props> = ({ task }) => {
         ) : isTimerVisible ? (
           <>
             <IconButton
-              className="bg-blue-500 text-white hover:bg-blue-600"
+              className="bg-blue-500 text-white hover:bg-blue-600 pointer-events-auto"
               onClick={handleStartOrReset}
             >
               <BiReset title="Reset" />
             </IconButton>
             <IconButton
-              className="bg-yellow-400 text-white hover:bg-yellow-500"
+              className="bg-yellow-400 text-white hover:bg-yellow-500 pointer-events-auto"
               onClick={handlePauseOrResume}
             >
               {isRunning ? (
@@ -225,7 +224,7 @@ const TaskDeck: React.FC<Props> = ({ task }) => {
               )}
             </IconButton>
             <IconButton
-              className="bg-green-500 text-white hover:bg-green-600"
+              className="bg-green-500 text-white hover:bg-green-600 pointer-events-auto"
               onClick={handleStopAndMarkAsDone}
             >
               <BiCheck title="Stop and Mark as Done" />
@@ -234,19 +233,19 @@ const TaskDeck: React.FC<Props> = ({ task }) => {
         ) : (
           <>
             <IconButton
-              className="bg-blue-500 text-white hover:bg-blue-600"
+              className="bg-blue-500 text-white hover:bg-blue-600 pointer-events-auto"
               onClick={handleStartOrReset}
             >
               <BiTimer title="Start Timer" />
             </IconButton>
             <IconButton
-              className="bg-yellow-400 text-white hover:bg-yellow-500"
+              className="bg-yellow-400 text-white hover:bg-yellow-500 pointer-events-auto"
               onClick={handleEdit}
             >
               <BiEditAlt title="Edit" />
             </IconButton>
             <IconButton
-              className="bg-red-500 text-white hover:bg-red-600"
+              className="bg-red-500 text-white hover:bg-red-600 pointer-events-auto"
               onClick={onDeleteTask}
             >
               <BiSolidTrash title="Delete" />

@@ -83,23 +83,24 @@ const TaskStatisticsBlock: React.FC = () => {
   }
 
   return (
-    <section className="my-8 max-w-3xl mx-auto bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-lg shadow-lg">
-      <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-6 text-center">
+    <section className="my-8 max-w-3xl mx-auto bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-lg shadow-lg p-4">
+      {/* Заголовок */}
+      <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-4 text-center">
         Task Time Statistics
       </h2>
 
       {/* Фильтры */}
-      <div className="flex justify-center mb-6 space-x-4">
+      <div className="flex flex-wrap justify-center gap-4 mb-6">
         {['day', 'week', 'month', 'all'].map((option) => (
           <button
             key={option}
             onClick={() =>
               setFilter(option as 'day' | 'week' | 'month' | 'all')
             }
-            className={`px-4 py-2 rounded-md ${
+            className={`px-3 py-2 text-sm sm:text-base rounded-md transition-all ${
               filter === option
                 ? 'bg-blue-500 text-white'
-                : 'bg-gray-200 dark:bg-gray-700'
+                : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600'
             }`}
           >
             {option.charAt(0).toUpperCase() + option.slice(1)}
@@ -108,27 +109,31 @@ const TaskStatisticsBlock: React.FC = () => {
       </div>
 
       {/* Список задач */}
-      <div className="bg-white dark:bg-gray-900 shadow-md rounded-lg p-6">
+      <div className="bg-white dark:bg-gray-900 shadow-md rounded-lg p-4 sm:p-6">
         {groupedTasks.length > 0 ? (
           <ul className="space-y-4">
             {groupedTasks.map((task, index) => (
               <li
                 key={index}
-                className="flex justify-between items-center border-b border-gray-300 pb-2"
+                className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0 border-b border-gray-300 dark:border-gray-700 pb-2 last:border-b-0"
               >
-                <span>
+                <span className="font-medium text-sm sm:text-base text-gray-700 dark:text-gray-300">
                   {task.description} ({task.count})
                 </span>
-                <span>
-                  {`${Math.floor(task.totalTime / 3600)}h ${Math.floor(
-                    (task.totalTime % 3600) / 60
-                  )}m ${task.totalTime % 60}s`}
+                <span className="font-medium text-sm sm:text-base text-gray-500 dark:text-gray-400">
+                  {task.totalTime > 0
+                    ? `${Math.floor(task.totalTime / 3600)}h ${Math.floor(
+                        (task.totalTime % 3600) / 60
+                      )}m ${task.totalTime % 60}s`
+                    : '0h 0m 0s'}
                 </span>
               </li>
             ))}
           </ul>
         ) : (
-          <p>No tasks found for the selected filter.</p>
+          <p className="text-center text-gray-500">
+            No tasks found for the selected filter.
+          </p>
         )}
       </div>
     </section>

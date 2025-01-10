@@ -1,6 +1,6 @@
 import { useContext, useEffect } from 'react';
-import { ThemeContext } from '../../providers/ThemeProvider';
 import { BiSun, BiMoon } from 'react-icons/bi';
+import { ThemeContext } from '../../providers/ThemeProvider/ThemeProvider';
 
 const ChangeTheme = () => {
   const { theme, setTheme } = useContext(ThemeContext);

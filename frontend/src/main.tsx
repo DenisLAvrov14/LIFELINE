@@ -4,10 +4,10 @@ import App from './App';
 import { Provider } from 'react-redux';
 import { store } from './redux/store';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ThemeProvider } from './providers/ThemeProvider';
 import { ReactKeycloakProvider } from '@react-keycloak/web';
 import Keycloak from 'keycloak-js';
 import keycloakConfig from './keycloak-config';
+import { ThemeProvider } from './providers/ThemeProvider/ThemeProvider';
 
 const keycloak = new Keycloak(keycloakConfig);
 

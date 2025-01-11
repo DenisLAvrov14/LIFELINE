@@ -5,6 +5,7 @@ import Todo from './modules/Todo/Todo';
 import Statistic from './modules/Statistic/Statistic';
 import PrivateRoute from './providers/PrivateRoute/PrivateRoute';
 import Login from './components/Login/Login';
+import Footer from './components/Footer/Footer';
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
           <Route path="*" element={<div>404: Page Not Found</div>} />
         </Routes>
       </BrowserRouter>
+      <Footer />
     </div>
   );
 }

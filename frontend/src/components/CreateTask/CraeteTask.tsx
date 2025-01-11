@@ -94,7 +94,7 @@ const CreateTask: React.FC = () => {
             placeholder="Enter your task"
             value={taskDescription}
             onChange={handleInputChange}
-            className="w-full sm:w-auto border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-gray-700 dark:text-gray-200 bg-gray-50 dark:bg-gray-700 focus:outline-none focus:ring focus:ring-blue-500"
+            className="w-full sm:w-auto border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-gray-700 dark:text-gray-200 bg-gray-50 dark:bg-gray-700 focus:outline-none focus:ring focus:ring-blue-500 mt-1.5"
             aria-label="Task input"
             autoFocus
           />

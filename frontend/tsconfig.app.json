@@ -22,5 +22,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src", "keycloak-config.js"]
+  "include": ["src", "keycloak-config.js", "../backend/src/middleware"]
 }

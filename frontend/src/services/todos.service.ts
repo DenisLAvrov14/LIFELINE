@@ -1,10 +1,55 @@
 import axios, { AxiosError } from 'axios';
+import { KeycloakInstance } from 'keycloak-js';
 
-const API_URL = 'http://localhost:3001';
+// Читаем URL из .env
+const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+
+if (!API_URL) {
+  throw new Error('API URL is not defined. Check your .env file.');
+}
+
+// Экземпляр Keycloak
+let keycloak: KeycloakInstance;
+
+// Устанавливаем экземпляр Keycloak
+export const setKeycloakInstance = (kc: KeycloakInstance) => {
+  keycloak = kc;
+};
+
+// Создаём инстанс axios с базовым URL
+const apiClient = axios.create({
+  baseURL: API_URL,
+});
+
+// Функция обновления токена
+const refreshAccessToken = async () => {
+  if (keycloak && keycloak.refreshToken) {
+    try {
+      const isUpdated = await keycloak.updateToken(30); // Обновляем за 30 секунд до истечения
+      if (isUpdated) {
+        console.log('Access token refreshed');
+      }
+    } catch (err) {
+      console.error('Failed to refresh token', err);
+      throw new Error('Unable to refresh token. Please login again.');
+    }
+  }
+};
+
+// Добавляем токен в заголовок Authorization
+apiClient.interceptors.request.use(async (config) => {
+  if (keycloak) {
+    await refreshAccessToken(); // Проверяем и обновляем токен
+    if (keycloak.token) {
+      config.headers.Authorization = `Bearer ${keycloak.token}`;
+    }
+  }
+  return config;
+});
 
 export const getTodos = async () => {
   try {
-    const response = await axios.get(`${API_URL}/todos`);
+    const response = await apiClient.get('/todos');
     return response.data;
   } catch (error) {
     console.error('Error fetching todos:', error);
@@ -19,8 +64,8 @@ export const updateTodo = async (
   isDone: boolean
 ) => {
   try {
-    const response = await axios.put(`${API_URL}/todos/${id}`, {
-      userId, // Передаем userId для возможного обновления
+    const response = await apiClient.put(`/todos/${id}`, {
+      userId,
       description,
       isDone,
     });
@@ -33,7 +78,7 @@ export const updateTodo = async (
 
 export const deleteTodo = async (id: string) => {
   try {
-    await axios.delete(`${API_URL}/todos/${id}`);
+    await apiClient.delete(`/todos/${id}`);
   } catch (error) {
     console.error('Error deleting todo:', error);
     throw error;
@@ -244,10 +289,11 @@ export const getTimerStatus = async (taskId: string) => {
   }
 };
 
-export const getFilteredStats = async (userId: string) => {
+export const getFilteredStats = async (token: string, userId: string) => {
   try {
     const response = await axios.get(`${API_URL}/statistics/weekly-stats`, {
-      params: { userId },
+      headers: { Authorization: `Bearer ${token}` },
+      params: { userId }, 
     });
     return response.data;
   } catch (error) {

@@ -8,13 +8,17 @@ import { ReactKeycloakProvider } from '@react-keycloak/web';
 import Keycloak from 'keycloak-js';
 import keycloakConfig from './keycloak-config';
 import { ThemeProvider } from './providers/ThemeProvider/ThemeProvider';
+import { setKeycloakInstance } from './services/todos.service';
 
+// Создаём инстанс Keycloak
 const keycloak = new Keycloak(keycloakConfig);
+
+// Передаём Keycloak в сервисы
+setKeycloakInstance(keycloak);
 
 const queryClient = new QueryClient();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  // <React.StrictMode>
   <ReactKeycloakProvider authClient={keycloak}>
     <ThemeProvider>
       <Provider store={store}>
@@ -24,5 +28,4 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       </Provider>
     </ThemeProvider>
   </ReactKeycloakProvider>
-  // </React.StrictMode>
 );

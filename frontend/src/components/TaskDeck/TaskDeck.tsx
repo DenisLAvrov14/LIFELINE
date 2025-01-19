@@ -15,13 +15,14 @@ import { TaskInput } from '../../components/TaskInput/TaskInput';
 import { IconButton } from '../../components/IconButton/IconButton';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import todosService from '../../services/todos.service';
+import { useKeycloak } from '@react-keycloak/web'; // Подключение Keycloak
 
 type Props = {
   task: Task;
 };
 
 const TaskDeck: React.FC<Props> = ({ task }) => {
-  const userId = '00000000-0000-0000-0000-000000000001';
+  const { keycloak } = useKeycloak(); // Получаем токен Keycloak
 
   const [isEdit, setIsEdit] = useState<boolean>(false);
   const [inputEdit, setInputEdit] = useState<string>(task.description);
@@ -33,6 +34,12 @@ const TaskDeck: React.FC<Props> = ({ task }) => {
 
   const handleEdit = useCallback(() => setIsEdit((prev) => !prev), []);
   const queryClient = useQueryClient();
+
+  // Проверяем наличие токена перед выполнением операций
+  if (!keycloak.token) {
+    console.error('Keycloak token is missing');
+    return <div>Authentication error: Token is missing</div>;
+  }
 
   // Восстановление состояния из localStorage
   useEffect(() => {
@@ -74,13 +81,8 @@ const TaskDeck: React.FC<Props> = ({ task }) => {
   );
 
   const mutationUpdateTask = useMutation({
-    mutationFn: async ({
-      id,
-      description,
-    }: {
-      id: string;
-      description: string;
-    }) => todosService.updateTodo(id, userId, description, task.isDone),
+    mutationFn: async (data: { id: string; description: string }) =>
+      todosService.updateTodo(data.id, keycloak.token!, data.description, task.isDone), // Передаём токен вместо userId
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['todos'] });
       setIsEdit(false);
@@ -136,15 +138,15 @@ const TaskDeck: React.FC<Props> = ({ task }) => {
 
     await todosService.saveTaskTime(
       task.id,
-      userId,
+      keycloak.token!,
       startTime || endTime,
       endTime,
       duration
     );
-    await todosService.taskIsDone(task.id, userId);
+    await todosService.taskIsDone(task.id, keycloak.token!);
     queryClient.invalidateQueries({ queryKey: ['todos'] });
     setIsTimerVisible(false);
-  }, [startTime, elapsedTime, task.id, userId, queryClient]);
+  }, [startTime, elapsedTime, task.id, keycloak.token, queryClient]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -160,7 +162,6 @@ const TaskDeck: React.FC<Props> = ({ task }) => {
 
   return (
     <div className="flex flex-col md:flex-row justify-between items-center p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all w-full max-w-lg space-y-4 md:space-y-0 md:space-x-4 relative">
-      {/* Task Description or Input */}
       <div className="flex-grow text-center md:text-left">
         {isEdit ? (
           <TaskInput
@@ -188,7 +189,6 @@ const TaskDeck: React.FC<Props> = ({ task }) => {
         )}
       </div>
 
-      {/* Action Buttons */}
       <div className="flex flex-wrap justify-center md:justify-end gap-2 relative z-10">
         {isEdit ? (
           <>

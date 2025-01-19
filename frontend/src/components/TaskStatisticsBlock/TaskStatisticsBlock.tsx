@@ -1,11 +1,11 @@
 import React, { useMemo, useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { getFilteredStats } from '../../services/todos.service';
+import { useKeycloak } from '@react-keycloak/web'; // Подключение Keycloak
 
 const TaskStatisticsBlock: React.FC = () => {
+  const { keycloak } = useKeycloak(); // Получаем экземпляр Keycloak
   const [filter, setFilter] = useState<'day' | 'week' | 'month' | 'all'>('all');
-  const userId = '00000000-0000-0000-0000-000000000001';
-  const queryClient = useQueryClient();
 
   const getDateRange = () => {
     const now = new Date();
@@ -31,25 +31,26 @@ const TaskStatisticsBlock: React.FC = () => {
 
   const { startDate, endDate } = getDateRange();
 
-  const {
-    data: tasks,
-    isLoading,
-    isError,
-  } = useQuery({
-    queryKey: ['todos', userId], // Унифицированный ключ
-    queryFn: () => getFilteredStats(userId),
+  const { data: tasks, isLoading, isError } = useQuery({
+    queryKey: ['todos', keycloak.token],
+    queryFn: () => {
+      if (!keycloak.token || !keycloak.tokenParsed?.sub) {
+        throw new Error('Token or userId is missing'); // Ошибка, если токен или userId отсутствуют
+      }
+      return getFilteredStats(keycloak.token, keycloak.tokenParsed.sub); // Передаём токен и userId
+    },
     refetchOnWindowFocus: true,
     staleTime: 60000,
   });
+  
 
   const filteredTasks = useMemo(() => {
-    if (!tasks || tasks.length === 0) return [];
-
+    if (!Array.isArray(tasks) || tasks.length === 0) return []; // Если tasks пустой массив
     return tasks.filter((task: any) => {
       const taskDate = new Date(task.last_completed_at);
       return taskDate >= startDate && taskDate <= endDate;
     });
-  }, [tasks, startDate, endDate]);
+  }, [tasks, startDate, endDate]);  
 
   const groupedTasks = useMemo(() => {
     if (filteredTasks.length === 0) return [];

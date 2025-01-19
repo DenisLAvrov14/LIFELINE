@@ -9,7 +9,7 @@ import timerRoutes from "./routes/timer.routes";
 import statisticsRoutes from "./routes/statistics.routes";
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT;
 
 // Подключаем CORS с учетом безопасности
 app.use(

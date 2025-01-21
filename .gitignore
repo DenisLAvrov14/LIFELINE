@@ -14,3 +14,4 @@ logs/
 keycloak/docker-compose.yml
 keycloak/data
 keycloakify-starter-tailwind
+keycloak

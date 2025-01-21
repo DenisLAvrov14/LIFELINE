@@ -9,36 +9,62 @@ import pool from "../services/db.connection";
 
 // Создание записи времени выполнения задачи
 export const createTaskTimeController = async (req: Request, res: Response) => {
-  const { task_id, user_id, start_time, end_time, duration } = req.body;
-
-  console.log("Received data:", {
-    task_id,
-    user_id,
-    start_time,
-    end_time,
-    duration,
-  });
-
-  if (!task_id || !user_id || !start_time || (!duration && duration !== 0)) {
-    return res.status(400).send("Invalid data: Missing required fields");
-  }
-
   try {
+    const userId = (req as any).userId;
+
+    if (!userId) {
+      return res
+        .status(401)
+        .json({ error: "Unauthorized: User ID is missing in request token" });
+    }
+
+    const { task_id, start_time, end_time, duration } = req.body;
+
+    console.log("Received data:", {
+      task_id,
+      user_id: userId,
+      start_time,
+      end_time,
+      duration,
+    });
+
+    if (!task_id || !start_time || (!duration && duration !== 0)) {
+      return res.status(400).send("Invalid data: Missing required fields");
+    }
+
     const startTimeFormatted = new Date(start_time).toISOString();
     const endTimeFormatted = end_time ? new Date(end_time).toISOString() : null;
     const roundedDuration = Math.round(duration);
 
-    await createTaskTimeModel({
-      task_id,
-      user_id,
-      start_time: startTimeFormatted,
-      end_time: endTimeFormatted,
-      duration: roundedDuration,
-    });
+    const query = `
+      INSERT INTO task_times (task_id, user_id, start_time, end_time, duration)
+      VALUES ($1, $2, $3, $4, $5)
+      RETURNING *;
+    `;
 
-    res.status(201).json({ message: "Task time created successfully" });
+    const result = await pool.query(query, [
+      task_id,
+      userId,
+      startTimeFormatted,
+      endTimeFormatted,
+      roundedDuration,
+    ]);
+
+    if (result.rowCount === 0) {
+      return res
+        .status(500)
+        .json({ error: "Failed to create task time. No rows affected." });
+    }
+
+    res.status(201).json({
+      message: "Task time created successfully",
+      data: result.rows[0],
+    });
   } catch (error: any) {
     console.error("Error creating task time:", error.message);
+    if (error.code) {
+      console.error("Database error code:", error.code);
+    }
     res.status(500).send(`Error creating task time: ${error.message}`);
   }
 };
@@ -107,12 +133,20 @@ export const updateTimerStatusController = async (
 
 // Отметить задачу как выполненную
 export const markTaskAsDone = async (req: Request, res: Response) => {
-  const { id } = req.params;
-
   try {
+    const userId = (req as any).userId;
+
+    if (!userId) {
+      return res
+        .status(401)
+        .json({ error: "Unauthorized: User ID is missing in request token" });
+    }
+
+    const { id } = req.params;
+
     const result = await pool.query(
       `UPDATE tasks SET "isDone" = TRUE WHERE id = $1 RETURNING id, description, "isDone", created_at AS "createdAt"`,
-      [id],
+      [id]
     );
 
     if (result.rowCount === 0) {

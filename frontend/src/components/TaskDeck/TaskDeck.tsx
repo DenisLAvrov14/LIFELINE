@@ -15,7 +15,7 @@ import { TaskInput } from '../../components/TaskInput/TaskInput';
 import { IconButton } from '../../components/IconButton/IconButton';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import todosService from '../../services/todos.service';
-import { useKeycloak } from '@react-keycloak/web'; // Подключение Keycloak
+import { useKeycloak } from '@react-keycloak/web';
 
 type Props = {
   task: Task;
@@ -35,7 +35,6 @@ const TaskDeck: React.FC<Props> = ({ task }) => {
   const handleEdit = useCallback(() => setIsEdit((prev) => !prev), []);
   const queryClient = useQueryClient();
 
-  // Проверяем наличие токена перед выполнением операций
   if (!keycloak.token) {
     console.error('Keycloak token is missing');
     return <div>Authentication error: Token is missing</div>;
@@ -82,7 +81,12 @@ const TaskDeck: React.FC<Props> = ({ task }) => {
 
   const mutationUpdateTask = useMutation({
     mutationFn: async (data: { id: string; description: string }) =>
-      todosService.updateTodo(data.id, keycloak.token!, data.description, task.isDone), // Передаём токен вместо userId
+      todosService.updateTodo(
+        data.id,
+        keycloak.token!, // Передаём токен напрямую
+        data.description,
+        task.isDone
+      ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['todos'] });
       setIsEdit(false);
@@ -132,21 +136,27 @@ const TaskDeck: React.FC<Props> = ({ task }) => {
     setIsRunning(false);
     const endTime = new Date();
     const duration = startTime
-      ? Math.floor((endTime.getTime() - startTime.getTime()) / 1000) +
-        elapsedTime
+      ? Math.floor((endTime.getTime() - startTime.getTime()) / 1000) + elapsedTime
       : elapsedTime;
-
-    await todosService.saveTaskTime(
-      task.id,
-      keycloak.token!,
-      startTime || endTime,
-      endTime,
-      duration
-    );
-    await todosService.taskIsDone(task.id, keycloak.token!);
-    queryClient.invalidateQueries({ queryKey: ['todos'] });
-    setIsTimerVisible(false);
-  }, [startTime, elapsedTime, task.id, keycloak.token, queryClient]);
+  
+    try {
+      await todosService.saveTaskTime(
+        task.id,
+        startTime || endTime,
+        endTime,
+        duration
+      );
+      if (keycloak.token) {
+        await todosService.taskIsDone(task.id, keycloak.token); // Передаём токен напрямую
+      } else {
+        console.error('Keycloak token is missing');
+      }
+      queryClient.invalidateQueries({ queryKey: ['todos'] });
+      setIsTimerVisible(false);
+    } catch (error) {
+      console.error('Error in handleStopAndMarkAsDone:', error);
+    }
+  }, [startTime, elapsedTime, task.id, queryClient]);  
 
   useEffect(() => {
     let interval: NodeJS.Timeout;

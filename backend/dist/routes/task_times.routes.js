@@ -2,9 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const task_times_controller_1 = require("../controllers/task_times.controller");
+const authenticateToken_1 = require("../middleware/authenticateToken");
 const router = (0, express_1.Router)();
 // Создание записи времени
-router.post("/", task_times_controller_1.createTaskTimeController);
+router.post("/", authenticateToken_1.authenticateToken, task_times_controller_1.createTaskTimeController);
 // Обновление времени выполнения задачи
 router.post("/update-task-time", task_times_controller_1.updateTaskTimeController);
 // Обновление статуса таймера (пауза/возобновление)
@@ -14,7 +15,7 @@ router.get("/status/:taskId", task_times_controller_1.getTimerStatus);
 // Запуск таймера
 router.post("/start", task_times_controller_1.startTimerController);
 // Завершение задачи
-router.put("/tasks/:id/done", task_times_controller_1.markTaskAsDone);
+router.put("/tasks/:id/done", authenticateToken_1.authenticateToken, task_times_controller_1.markTaskAsDone);
 // Продолжить работу таймера
 router.post("/resume", (req, res) => {
     console.log("Request body:", req.body);

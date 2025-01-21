@@ -1,19 +1,20 @@
 import axios, { AxiosError } from 'axios';
 import { KeycloakInstance } from 'keycloak-js';
+import {jwtDecode} from 'jwt-decode';
 
 // Читаем URL из .env
-const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+const API_URL = import.meta.env.VITE_API_BASE_URL;
 
 if (!API_URL) {
   throw new Error('API URL is not defined. Check your .env file.');
 }
 
 // Экземпляр Keycloak
-let keycloak: KeycloakInstance;
+let keycloakInstance: KeycloakInstance | null = null;
 
 // Устанавливаем экземпляр Keycloak
 export const setKeycloakInstance = (kc: KeycloakInstance) => {
-  keycloak = kc;
+  keycloakInstance = kc;
 };
 
 // Создаём инстанс axios с базовым URL
@@ -23,14 +24,14 @@ const apiClient = axios.create({
 
 // Функция обновления токена
 const refreshAccessToken = async () => {
-  if (keycloak && keycloak.refreshToken) {
+  if (keycloakInstance && keycloakInstance.refreshToken) {
     try {
-      const isUpdated = await keycloak.updateToken(30); // Обновляем за 30 секунд до истечения
+      const isUpdated = await keycloakInstance.updateToken(30); // Обновляем за 30 секунд до истечения
       if (isUpdated) {
         console.log('Access token refreshed');
       }
     } catch (err) {
-      console.error('Failed to refresh token', err);
+      console.error('Failed to refresh token:', err);
       throw new Error('Unable to refresh token. Please login again.');
     }
   }
@@ -38,24 +39,35 @@ const refreshAccessToken = async () => {
 
 // Добавляем токен в заголовок Authorization
 apiClient.interceptors.request.use(async (config) => {
-  if (keycloak) {
+  if (keycloakInstance) {
     await refreshAccessToken(); // Проверяем и обновляем токен
-    if (keycloak.token) {
-      config.headers.Authorization = `Bearer ${keycloak.token}`;
+    if (keycloakInstance.token) {
+      config.headers.Authorization = `Bearer ${keycloakInstance.token}`;
     }
   }
   return config;
 });
 
-export const getTodos = async () => {
+// Функция для получения задач
+export const getTodos = async (): Promise<any> => {
+  if (!keycloakInstance || !keycloakInstance.token) {
+    throw new Error('Keycloak instance or token is not available.');
+  }
+
   try {
     const response = await apiClient.get('/todos');
     return response.data;
-  } catch (error) {
-    console.error('Error fetching todos:', error);
-    throw error;
+  } catch (err: any) {
+    if (axios.isAxiosError(err)) {
+      console.error('Error fetching todos:', err.response?.data || err.message);
+      throw new Error(
+        err.response?.data?.error || 'Failed to fetch todos. Please try again later.'
+      );
+    }
+    throw err;
   }
 };
+
 
 export const updateTodo = async (
   id: string,
@@ -95,14 +107,21 @@ export const createUser = async (username: string, email: string) => {
   }
 };
 
-export const createTask = async (description: string, userId: string) => {
+export const createTask = async (description: string) => {
+  if (!keycloakInstance?.tokenParsed?.sub) {
+    throw new Error('User ID is missing. Please check your authentication.');
+  }
+
+  const userId = keycloakInstance.tokenParsed.sub;
+
   try {
-    const response = await axios.post(`${API_URL}/tasks`, {
+    const response = await apiClient.post('/tasks', {
       description,
       is_done: false,
-      userId, // Передаем userId
+      userId, // Передаем userId из токена
     });
-    console.log('Task created successfully!');
+
+    console.log('Task created successfully!', response.data);
     return response.data;
   } catch (error) {
     console.error('Error creating task:', error);
@@ -117,6 +136,10 @@ export const createTaskTime = async (
   endTime: Date,
   duration: number
 ) => {
+  if (!keycloakInstance?.token) {
+    throw new Error("Token is missing. Please login again.");
+  }
+
   const startTimeFormatted = startTime
     .toISOString()
     .slice(0, 19)
@@ -124,16 +147,25 @@ export const createTaskTime = async (
   const endTimeFormatted = endTime.toISOString().slice(0, 19).replace('T', ' ');
 
   try {
-    const response = await axios.post(`${API_URL}/task-times`, {
-      task_id: taskId,
-      user_id: userId, // Передаём userId
-      start_time: startTimeFormatted,
-      end_time: endTimeFormatted,
-      duration,
-    });
+    const response = await apiClient.post(
+      `/task-times`,
+      {
+        task_id: taskId,
+        user_id: userId, // Передаём userId
+        start_time: startTimeFormatted,
+        end_time: endTimeFormatted,
+        duration,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${keycloakInstance.token}`, // Передаём токен
+        },
+      }
+    );
+    console.log("Task time created successfully:", response.data);
     return response.data;
   } catch (error) {
-    console.error('Error creating task time:', error);
+    console.error("Error creating task time:", error);
     throw error;
   }
 };
@@ -148,11 +180,23 @@ export const getTaskTimes = async (userId: string) => {
   }
 };
 
-export const taskIsDone = async (taskId: string, userId: string) => {
+export const taskIsDone = async (taskId: string, token: string) => {
+  const userId = jwtDecode<any>(token)?.sub;
+
+  if (!userId) {
+    throw new Error('User ID is missing from token');
+  }
+
   try {
-    const response = await axios.put(`${API_URL}/tasks/${taskId}/done`, {
-      userId,
-    });
+    const response = await axios.put(
+      `${API_URL}/tasks/${taskId}/done`,
+      { userId },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`, // Здесь должен быть токен
+        },
+      }
+    );
     return response.data;
   } catch (error) {
     console.error('Error marking task as done:', error);
@@ -162,15 +206,13 @@ export const taskIsDone = async (taskId: string, userId: string) => {
 
 export const saveTaskTime = async (
   taskId: string,
-  userId: string,
   startTime: Date,
   endTime: Date,
   duration: number
 ) => {
   try {
-    const response = await axios.post(`${API_URL}/task-times`, {
+    const response = await apiClient.post('/task-times', {
       task_id: taskId,
-      user_id: userId,
       start_time: startTime.toISOString(),
       end_time: endTime.toISOString(),
       duration: Math.round(duration),

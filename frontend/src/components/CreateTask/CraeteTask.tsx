@@ -4,8 +4,10 @@ import { useDispatch } from 'react-redux';
 import { setFilterValue, addTask } from '../../redux/taskSlice/CreateTaskSlice';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import todosService from '../../services/todos.service';
+import { useKeycloak } from '@react-keycloak/web'; // Подключаем Keycloak
 
 const CreateTask: React.FC = () => {
+  const { keycloak } = useKeycloak(); // Получаем экземпляр Keycloak
   const dispatch = useDispatch();
   const [taskDescription, setTaskDescription] = useState<string>('');
   const [filterValue, setLocalFilterValue] = useState<
@@ -16,15 +18,18 @@ const CreateTask: React.FC = () => {
 
   const mutation = useMutation({
     mutationFn: async (description: string) => {
-      const userId = '00000000-0000-0000-0000-000000000001'; // Убедитесь, что userId доступен
-      return await todosService.createTask(description, userId);
+      return await todosService.createTask(description); // Передаём только description
     },
     onSuccess: async (data) => {
+      if (!keycloak?.tokenParsed?.sub) { // Используем экземпляр keycloak
+        throw new Error('Token or userId is missing');
+      }
+  
+      const userId = keycloak.tokenParsed.sub; // Берём userId из токена
       const startTime = new Date();
       const endTime = new Date();
       const duration = 0;
-      const userId = '00000000-0000-0000-0000-000000000001';
-
+  
       try {
         await todosService.createTaskTime(
           data.id,
@@ -33,7 +38,7 @@ const CreateTask: React.FC = () => {
           endTime,
           duration
         );
-
+  
         dispatch(
           addTask({
             id: data.id,
@@ -41,21 +46,21 @@ const CreateTask: React.FC = () => {
             isDone: false,
           })
         );
-
+  
         queryClient.invalidateQueries({ queryKey: ['todos'] });
         alert('Task was added successfully!');
       } catch (error) {
         console.error('Error creating task time:', error);
         alert('Error adding task time. Please try again.');
       }
-
+  
       setTaskDescription('');
     },
     onError: (error) => {
       console.error('Error creating task:', error);
       alert('Failed to create task. Please try again.');
     },
-  });
+  });  
 
   const handleAddTask = useCallback(() => {
     if (!taskDescription.trim()) {

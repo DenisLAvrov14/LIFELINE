@@ -7,11 +7,12 @@ import {
   getTimerStatus,
   startTimerController,
 } from "../controllers/task_times.controller";
+import { authenticateToken } from "../middleware/authenticateToken";
 
 const router = Router();
 
 // Создание записи времени
-router.post("/", createTaskTimeController);
+router.post("/", authenticateToken, createTaskTimeController);
 
 // Обновление времени выполнения задачи
 router.post("/update-task-time", updateTaskTimeController);
@@ -26,7 +27,7 @@ router.get("/status/:taskId", getTimerStatus);
 router.post("/start", startTimerController);
 
 // Завершение задачи
-router.put("/tasks/:id/done", markTaskAsDone);
+router.put("/tasks/:id/done", authenticateToken, markTaskAsDone);
 
 // Продолжить работу таймера
 router.post("/resume", (req, res) => {

@@ -42,6 +42,7 @@ apiClient.interceptors.request.use(async (config) => {
   if (keycloakInstance) {
     await refreshAccessToken(); // Проверяем и обновляем токен
     if (keycloakInstance.token) {
+      console.log("✅ Adding Authorization Header:", `Bearer ${keycloakInstance.token}`);
       config.headers.Authorization = `Bearer ${keycloakInstance.token}`;
     }
   }
@@ -51,6 +52,7 @@ apiClient.interceptors.request.use(async (config) => {
 // Функция для получения задач
 export const getTodos = async (): Promise<any> => {
   if (!keycloakInstance || !keycloakInstance.token) {
+    console.error("❌ User ID is missing from token!", keycloakInstance?.tokenParsed);
     throw new Error('Keycloak instance or token is not available.');
   }
 
@@ -113,6 +115,7 @@ export const createTask = async (description: string) => {
   }
 
   const userId = keycloakInstance.tokenParsed.sub;
+  console.log("✅ Extracted userId from token:", userId);
 
   try {
     const response = await apiClient.post('/tasks', {

@@ -7,8 +7,12 @@ const Login = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log("🔐 Keycloak instance:", keycloak);
+    console.log("✅ Authenticated:", keycloak.authenticated);
+    console.log("🔑 Raw Token:", keycloak.token);
+    console.log("📜 Parsed Token:", keycloak.tokenParsed);
     if (keycloak.authenticated) {
-      console.log('User ID:', keycloak.tokenParsed?.sub); // ID пользователя
+      console.log('🆔 User ID:', keycloak.tokenParsed?.sub); 
       navigate('/todo'); // Перенаправление на /todo после успешного входа
     }
   }, [keycloak.authenticated, navigate]);

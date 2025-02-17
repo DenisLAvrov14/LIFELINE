@@ -12,7 +12,7 @@ const Todo: React.FC = () => {
 
   // Фильтрация задач на основе текущего значения фильтра из Redux
   const filteredData = useMemo(() => {
-    if (!queryData) return [];
+    if (!Array.isArray(queryData)) return [];
 
     switch (filter) {
       case 'all':
@@ -41,7 +41,7 @@ const Todo: React.FC = () => {
           </div>
         ) : filteredData?.length ? (
           <ul className="space-y-6">
-            {filteredData.map((task: Task) => (
+            {filteredData?.map((task: Task) => (
               <TaskDeck key={task.id} task={task} />
             ))}
           </ul>

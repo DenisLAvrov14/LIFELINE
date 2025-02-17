@@ -17,12 +17,21 @@ const db_connection_1 = __importDefault(require("../services/db.connection"));
 // Получение всех задач (Todos)
 const getTodos = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const result = yield db_connection_1.default.query(`SELECT id, description, "isDone", created_at AS "createdAt" FROM tasks`);
+        const userId = req.userId; // userId из токена
+        console.log("🔍 [getTodos] Запрос задач для userId:", userId);
+        if (!userId) {
+            console.error("❌ [getTodos] Ошибка: userId отсутствует в запросе");
+            return res.status(400).json({ error: 'User ID is missing in request token' });
+        }
+        const result = yield db_connection_1.default.query(`SELECT id, description, "isDone", created_at AS "createdAt"
+       FROM tasks 
+       WHERE user_id = $1`, [userId]);
+        console.log("✅ [getTodos] Найдено задач:", result.rowCount);
         res.json(result.rows);
     }
     catch (error) {
-        console.error("Error fetching todos:", error.message);
-        res.status(500).send("Error fetching todos: " + error.message);
+        console.error("❌ [getTodos] Ошибка при получении задач:", error.message);
+        res.status(500).json({ error: "Internal server error" });
     }
 });
 exports.getTodos = getTodos;

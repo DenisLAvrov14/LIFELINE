@@ -1,31 +1,7 @@
-import React, { useEffect, useState } from 'react';
 import TaskStatisticsBlock from '../../components/TaskStatisticsBlock/TaskStatisticsBlock';
-import AvatarBlock from '../../components/AvatarBlock/AvatarBlock';
-import ProgressSection from '../../components/ProgressSection/ProgressSection';
 
 const Statistics: React.FC = () => {
-  // Хуки для данных
-  const [healthStats, setHealthStats] = useState([
-    { label: 'Health', value: 70 },
-    { label: 'Fitness', value: 50 },
-  ]);
-
-  const [intellectualStats, setIntellectualStats] = useState([
-    { label: 'Intelligence', value: 80 },
-    { label: 'Creativity', value: 60 },
-  ]);
-
-  const [socialStats, setSocialStats] = useState([
-    { label: 'Social Ability', value: 90 },
-    { label: 'Community Contribution', value: 40 },
-    { label: 'Environmental Responsibility', value: 30 },
-  ]);
-
-  const [knowledgeStats, setKnowledgeStats] = useState([
-    { label: 'Specialized Knowledge', value: 75 },
-    { label: 'Foreign Language Proficiency', value: 85 },
-  ]);
-
+  
   return (
     <div className="container mx-auto p-6 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 rounded-lg shadow-lg">
       {/* Блок с аватаром */}

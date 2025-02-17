@@ -7,6 +7,7 @@ import tasksRoutes from "./routes/tasks.routes";
 import userRoutes from "./routes/user.routes";
 import timerRoutes from "./routes/timer.routes";
 import statisticsRoutes from "./routes/statistics.routes";
+import fs from "fs";
 
 const app = express();
 const PORT = process.env.PORT;
@@ -36,12 +37,12 @@ app.use((req, res, next) => {
 });
 
 // Подключение маршрутов с базовыми путями
-app.use("/todos", todosRoutes);
-app.use("/task-times", taskTimesRoutes);
-app.use("/tasks", tasksRoutes);
-app.use("/users", userRoutes);
-app.use("/timer", timerRoutes);
-app.use("/statistics", statisticsRoutes);
+app.use("/api/todos", todosRoutes);
+app.use("/api/task-times", taskTimesRoutes);
+app.use("/api/tasks", tasksRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/timer", timerRoutes);
+app.use("/api/statistics", statisticsRoutes);
 
 // Обработчик 404
 app.use((req, res) => {
@@ -52,6 +53,19 @@ app.use((req, res) => {
 app.use("*", (req, res) => {
   res.status(404).send(`Cannot find route ${req.url}`);
 });
+
+// Логирование ошибок
+const logFile = fs.createWriteStream("backend.log", { flags: "a" });
+
+console.log = (msg) => {
+    logFile.write(`[${new Date().toISOString()}] ${msg}\n`);
+    process.stdout.write(`[${new Date().toISOString()}] ${msg}\n`);
+};
+
+console.error = (msg) => {
+    logFile.write(`[${new Date().toISOString()}] ERROR: ${msg}\n`);
+    process.stderr.write(`[${new Date().toISOString()}] ERROR: ${msg}\n`);
+};
 
 // Запуск сервера
 app.listen(PORT, () => {

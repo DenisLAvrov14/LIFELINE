@@ -62,6 +62,7 @@ export const authenticateToken = async (
   const token = authHeader && authHeader.split(' ')[1];
 
   if (!token) {
+    console.log("Received token:", token);
     return res.status(401).json({ error: 'Token not provided' });
   }
 

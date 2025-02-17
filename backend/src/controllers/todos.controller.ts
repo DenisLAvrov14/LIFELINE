@@ -4,13 +4,26 @@ import pool from "../services/db.connection";
 // Получение всех задач (Todos)
 export const getTodos = async (req: Request, res: Response) => {
   try {
+    const userId = (req as any).userId; // userId из токена
+    console.log("🔍 [getTodos] Запрос задач для userId:", userId);
+
+    if (!userId) {
+      console.error("❌ [getTodos] Ошибка: userId отсутствует в запросе");
+      return res.status(400).json({ error: 'User ID is missing in request token' });
+    }
+
     const result = await pool.query(
-      `SELECT id, description, "isDone", created_at AS "createdAt" FROM tasks`,
+      `SELECT id, description, "isDone", created_at AS "createdAt"
+       FROM tasks 
+       WHERE user_id = $1`, 
+      [userId]
     );
+
+    console.log("✅ [getTodos] Найдено задач:", result.rowCount);
     res.json(result.rows);
   } catch (error: any) {
-    console.error("Error fetching todos:", error.message);
-    res.status(500).send("Error fetching todos: " + error.message);
+    console.error("❌ [getTodos] Ошибка при получении задач:", error.message);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 

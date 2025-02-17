@@ -53,6 +53,7 @@ const authenticateToken = (req, res, next) => __awaiter(void 0, void 0, void 0, 
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
     if (!token) {
+        console.log("Received token:", token);
         return res.status(401).json({ error: 'Token not provided' });
     }
     try {

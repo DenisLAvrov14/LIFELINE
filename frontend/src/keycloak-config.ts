@@ -5,9 +5,9 @@ interface KeycloakConfig {
 }
 
 const keycloakConfig: KeycloakConfig = {
-  url: 'http://localhost:8080',
+  url: 'http://localhost:8180',
   realm: 'theplayerapp',
-  clientId: 'frontend-client',
+  clientId: 'frontend',
 };
 
 export default keycloakConfig;

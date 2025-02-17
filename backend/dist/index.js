@@ -12,6 +12,7 @@ const tasks_routes_1 = __importDefault(require("./routes/tasks.routes"));
 const user_routes_1 = __importDefault(require("./routes/user.routes"));
 const timer_routes_1 = __importDefault(require("./routes/timer.routes"));
 const statistics_routes_1 = __importDefault(require("./routes/statistics.routes"));
+const fs_1 = __importDefault(require("fs"));
 const app = (0, express_1.default)();
 const PORT = process.env.PORT;
 // Подключаем CORS с учетом безопасности
@@ -33,12 +34,12 @@ app.use((req, res, next) => {
     next();
 });
 // Подключение маршрутов с базовыми путями
-app.use("/todos", todos_routes_1.default);
-app.use("/task-times", task_times_routes_1.default);
-app.use("/tasks", tasks_routes_1.default);
-app.use("/users", user_routes_1.default);
-app.use("/timer", timer_routes_1.default);
-app.use("/statistics", statistics_routes_1.default);
+app.use("/api/todos", todos_routes_1.default);
+app.use("/api/task-times", task_times_routes_1.default);
+app.use("/api/tasks", tasks_routes_1.default);
+app.use("/api/users", user_routes_1.default);
+app.use("/api/timer", timer_routes_1.default);
+app.use("/api/statistics", statistics_routes_1.default);
 // Обработчик 404
 app.use((req, res) => {
     res.status(404).json({ error: `Cannot find route ${req.url}` });
@@ -47,6 +48,16 @@ app.use((req, res) => {
 app.use("*", (req, res) => {
     res.status(404).send(`Cannot find route ${req.url}`);
 });
+// Логирование ошибок
+const logFile = fs_1.default.createWriteStream("backend.log", { flags: "a" });
+console.log = (msg) => {
+    logFile.write(`[${new Date().toISOString()}] ${msg}\n`);
+    process.stdout.write(`[${new Date().toISOString()}] ${msg}\n`);
+};
+console.error = (msg) => {
+    logFile.write(`[${new Date().toISOString()}] ERROR: ${msg}\n`);
+    process.stderr.write(`[${new Date().toISOString()}] ERROR: ${msg}\n`);
+};
 // Запуск сервера
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}.`);

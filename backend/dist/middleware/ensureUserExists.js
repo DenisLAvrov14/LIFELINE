@@ -15,33 +15,43 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ensureUserExists = void 0;
 const db_connection_1 = __importDefault(require("../services/db.connection"));
 const ensureUserExists = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b;
     const userId = req.userId;
     const tokenPayload = req.keycloakToken;
     if (!userId || !tokenPayload) {
-        console.error("User ID or token payload is missing");
+        console.error("❌ [ensureUserExists] Ошибка: User ID или токен отсутствуют");
         return res.status(401).json({ error: "Unauthorized: Token payload is missing" });
     }
     const preferredUsername = tokenPayload.preferred_username || "Unknown";
     const email = tokenPayload.email || "unknown@example.com";
     try {
-        const query = `SELECT id FROM users WHERE id = $1`;
-        const result = yield db_connection_1.default.query(query, [userId]);
-        if (result.rowCount === 0) {
-            const insertQuery = `
-          INSERT INTO users (id, username, email)
-          VALUES ($1, $2, $3)
+        // 🔍 Проверяем сначала ID
+        const queryById = `SELECT id FROM users WHERE id = $1`;
+        const resultById = yield db_connection_1.default.query(queryById, [userId]);
+        if (((_a = resultById.rowCount) !== null && _a !== void 0 ? _a : 0) > 0) {
+            console.log(`🟢 [ensureUserExists] Пользователь найден по ID: ${userId}`);
+            return next(); // Пользователь уже есть, продолжаем
+        }
+        // 🔍 Проверяем email (вдруг ID разный, но email совпадает)
+        const queryByEmail = `SELECT id FROM users WHERE email = $1`;
+        const resultByEmail = yield db_connection_1.default.query(queryByEmail, [email]);
+        if (((_b = resultByEmail.rowCount) !== null && _b !== void 0 ? _b : 0) > 0) {
+            console.log(`🟢 [ensureUserExists] Пользователь найден по email: ${email}`);
+            return next(); // Email уже есть, продолжаем
+        }
+        // 🔄 Если пользователь не найден — создаем его
+        console.log(`🟡 [ensureUserExists] Добавляем нового пользователя: ${preferredUsername} (${email})`);
+        const insertQuery = `
+            INSERT INTO users (id, username, email)
+            VALUES ($1, $2, $3)
         `;
-            yield db_connection_1.default.query(insertQuery, [userId, preferredUsername, email]);
-            console.log(`New user added: ${preferredUsername}`);
-        }
-        else {
-            console.log(`User already exists: ${userId}`);
-        }
+        yield db_connection_1.default.query(insertQuery, [userId, preferredUsername, email]);
+        console.log(`✅ [ensureUserExists] Новый пользователь добавлен: ${preferredUsername}`);
         next();
     }
     catch (error) {
-        console.error("Error checking or adding user:", error.message);
-        return res.status(500).json({ error: "Internal server error" });
+        console.error("❌ [ensureUserExists] Ошибка при проверке или добавлении пользователя:", error.message);
+        return res.status(500).json({ error: error.message });
     }
 });
 exports.ensureUserExists = ensureUserExists;

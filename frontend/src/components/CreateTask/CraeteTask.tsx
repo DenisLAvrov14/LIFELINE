@@ -1,125 +1,190 @@
-import React, { ChangeEvent, useCallback, useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { BiSolidPlusCircle } from 'react-icons/bi';
+import { FaEdit } from 'react-icons/fa';
 import { useDispatch } from 'react-redux';
-import { setFilterValue, addTask } from '../../redux/taskSlice/CreateTaskSlice';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { addTask } from '../../redux/taskSlice/CreateTaskSlice';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import todosService from '../../services/todos.service';
-import { useKeycloak } from '@react-keycloak/web'; // Подключаем Keycloak
+import { useKeycloak } from '@react-keycloak/web';
+import { ThemeContext } from '../../providers/ThemeProvider/ThemeProvider'; // Подключаем контекст темы
+
+interface Folder {
+  id: string;
+  name: string;
+}
+
+const categories = [
+  'Health',
+  'Fitness',
+  'Intelligence',
+  'Creativity',
+  'Social Ability',
+  'Community Contribution',
+  'Environmental Responsibility',
+  'Specialized Knowledge',
+  'Foreign Language Proficiency',
+];
 
 const CreateTask: React.FC = () => {
-  const { keycloak } = useKeycloak(); // Получаем экземпляр Keycloak
+  const { keycloak } = useKeycloak();
   const dispatch = useDispatch();
-  const [taskDescription, setTaskDescription] = useState<string>('');
-  const [filterValue, setLocalFilterValue] = useState<
-    'all' | 'done' | 'undone'
-  >('all');
-
   const queryClient = useQueryClient();
+  const { theme } = useContext(ThemeContext); // Получаем текущую тему
+
+  const [taskDescription, setTaskDescription] = useState<string>('');
+  const [hasTimer, setHasTimer] = useState<boolean>(false);
+  const [alarmTime, setAlarmTime] = useState<string | undefined>(undefined);
+  const [folderId, setFolderId] = useState<string | undefined>(undefined);
+  const [isQuickTask, setIsQuickTask] = useState<boolean>(false);
+  const [taskCategory, setTaskCategory] = useState<string>('');
+
+  // Запрос на получение папок
+  const { data: folders = [] } = useQuery<Folder[]>({
+    queryKey: ['folders'],
+    queryFn: todosService.getFolders,
+  });
 
   const mutation = useMutation({
-    mutationFn: async (description: string) => {
-      return await todosService.createTask(description); // Передаём только description
-    },
-    onSuccess: async (data) => {
-      if (!keycloak?.tokenParsed?.sub) { // Используем экземпляр keycloak
+    mutationFn: async () => {
+      if (!keycloak?.tokenParsed?.sub) {
         throw new Error('Token or userId is missing');
       }
-  
-      const userId = keycloak.tokenParsed.sub; // Берём userId из токена
-      const startTime = new Date();
-      const endTime = new Date();
-      const duration = 0;
-  
-      try {
-        await todosService.createTaskTime(
-          data.id,
-          userId,
-          startTime,
-          endTime,
-          duration
-        );
-  
-        dispatch(
-          addTask({
-            id: data.id,
-            description: data.description,
-            isDone: false,
-          })
-        );
-  
-        queryClient.invalidateQueries({ queryKey: ['todos'] });
-        alert('Task was added successfully!');
-      } catch (error) {
-        console.error('Error creating task time:', error);
-        alert('Error adding task time. Please try again.');
+      const newTask = {
+        description: taskDescription,
+        userId: String(keycloak.tokenParsed.sub),
+        hasTimer: !isQuickTask && hasTimer,
+        alarmTime: hasTimer ? (alarmTime ?? null) : null,
+        folderId: folderId ?? null,
+        category: taskCategory || null,
+      };
+      return await todosService.createTask(newTask);
+    },
+    onSuccess: (data) => {
+      if (!data) {
+        console.error('No data returned from createTask');
+        return;
       }
-  
+      dispatch(
+        addTask({
+          id: data.id,
+          description: data.description,
+          isDone: isQuickTask,
+          hasTimer: data.has_timer,
+          alarmTime: data.alarm_time,
+          folderId: data.folder_id,
+          category: data.category,
+        })
+      );
+      queryClient.invalidateQueries({ queryKey: ['todos'] });
       setTaskDescription('');
+      setHasTimer(false);
+      setAlarmTime(undefined);
+      setFolderId(undefined);
+      setIsQuickTask(false);
+      setTaskCategory('');
     },
     onError: (error) => {
       console.error('Error creating task:', error);
       alert('Failed to create task. Please try again.');
     },
-  });  
-
-  const handleAddTask = useCallback(() => {
-    if (!taskDescription.trim()) {
-      alert('Task description cannot be empty.');
-      return;
-    }
-
-    mutation.mutate(taskDescription);
-  }, [mutation, taskDescription]);
-
-  const handleInputChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    setTaskDescription(e.target.value);
-  }, []);
-
-  const handleFilterChange = useCallback(
-    (event: ChangeEvent<HTMLSelectElement>) => {
-      const newFilter = event.target.value as 'all' | 'done' | 'undone';
-      setLocalFilterValue(newFilter);
-      dispatch(setFilterValue(newFilter));
-    },
-    [dispatch]
-  );
+  });
 
   return (
-    <div className="flex flex-col items-center px-4 py-6 sm:px-6 lg:px-8 dark:bg-gray">
-      <div className="w-full max-w-lg">
-        {/* Заголовок */}
-        <h2 className="text-3xl font-bold text-center text-gray-800 dark:text-gray-200 mb-6">
-          TO DO LIST
-        </h2>
-
-        {/* Поле ввода задач */}
-        <div className="grid grid-cols-1 sm:grid-cols-[3fr_auto_auto] gap-4 bg-white dark:bg-gray-800 p-4 shadow-md rounded-lg">
+    <div
+      className={`p-6 rounded-lg transition-all ${theme === 'dark' ? 'dark' : ''}`}
+    >
+      {/* Основной контейнер */}
+      <div className="max-w-[615px] flex flex-col px-4 py-4 rounded-lg space-y-2 mx-auto bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-white">
+        {/* Первая строка: Ввод + кнопка */}
+        <div className="flex items-center justify-center space-x-2">
           <input
             type="text"
-            placeholder="Enter your task"
+            placeholder="Enter your task..."
             value={taskDescription}
-            onChange={handleInputChange}
-            className="w-full sm:w-auto border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-gray-700 dark:text-gray-200 bg-gray-50 dark:bg-gray-700 focus:outline-none focus:ring focus:ring-blue-500 mt-1.5"
-            aria-label="Task input"
-            autoFocus
+            onChange={(e) => setTaskDescription(e.target.value)}
+            className="w-[535px] h-[38px] px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring"
           />
           <button
-            onClick={handleAddTask}
-            className="flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white rounded-lg px-4 py-2 transition focus:outline-none focus:ring focus:ring-blue-300"
-            aria-label="Add task"
+            onClick={() => mutation.mutate()}
+            className="w-[38px] h-[38px] flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white rounded-lg"
           >
-            <BiSolidPlusCircle title="Add task" size={24} />
+            <BiSolidPlusCircle size={20} />
           </button>
+        </div>
+
+        {/* Вторая строка: чекбоксы, категории, папки, управление */}
+        <div className="flex items-center justify-center space-x-2">
+          {/* Чекбоксы */}
+          <div className="flex items-center space-x-3 bg-gray-100 dark:bg-gray-700 px-3 py-1.5 rounded-lg h-[38px]">
+            <label className="flex items-center space-x-1 text-gray-900 dark:text-white text-sm">
+              <input
+                type="checkbox"
+                checked={isQuickTask}
+                onChange={() => setIsQuickTask(!isQuickTask)}
+                className="form-checkbox text-blue-600 w-4 h-4"
+              />
+              <span>Quick Task</span>
+            </label>
+
+            {!isQuickTask && (
+              <label className="flex items-center space-x-1 text-gray-900 dark:text-white text-sm">
+                <input
+                  type="checkbox"
+                  checked={hasTimer}
+                  onChange={() => setHasTimer(!hasTimer)}
+                  className="form-checkbox text-blue-600 w-4 h-4"
+                />
+                <span>Timer</span>
+              </label>
+            )}
+          </div>
+
+          {/* Категории */}
           <select
-            onChange={handleFilterChange}
-            value={filterValue}
-            className="w-full sm:w-auto border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-gray-700 dark:text-gray-200 bg-gray-50 dark:bg-gray-700 focus:outline-none focus:ring focus:ring-blue-500"
-            aria-label="Filter tasks"
+            onChange={(e) => setTaskCategory(e.target.value)}
+            value={taskCategory}
+            className="w-[180px] px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white h-[38px]"
           >
-            <option value="all">All</option>
-            <option value="done">Done</option>
-            <option value="undone">Undone</option>
+            <option value="">Select Category</option>
+            {categories.map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
           </select>
+
+          {/* Папки */}
+          <select
+            onChange={(e) => setFolderId(e.target.value || undefined)}
+            value={folderId || ''}
+            className="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white h-[38px]"
+          >
+            <option value="">No Folder</option>
+            {folders?.map((folder) => (
+              <option key={folder.id} value={folder.id}>
+                {folder.name}
+              </option>
+            ))}
+          </select>
+
+          {/* Кнопки управления папками */}
+          <button className="w-[38px] h-[38px] flex items-center justify-center bg-gray-300 dark:bg-gray-600 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500">
+            <BiSolidPlusCircle size={18} />
+          </button>
+
+          <button className="w-[38px] h-[38px] flex items-center justify-center bg-gray-300 dark:bg-gray-600 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500">
+            <FaEdit size={16} />
+          </button>
+
+          {/* Таймер (если включен) */}
+          {hasTimer && (
+            <input
+              type="datetime-local"
+              value={alarmTime || ''}
+              onChange={(e) => setAlarmTime(e.target.value)}
+              className="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white h-[38px]"
+            />
+          )}
         </div>
       </div>
     </div>

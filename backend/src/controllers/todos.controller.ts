@@ -9,14 +9,16 @@ export const getTodos = async (req: Request, res: Response) => {
 
     if (!userId) {
       console.error("❌ [getTodos] Ошибка: userId отсутствует в запросе");
-      return res.status(400).json({ error: 'User ID is missing in request token' });
+      return res
+        .status(400)
+        .json({ error: "User ID is missing in request token" });
     }
 
     const result = await pool.query(
       `SELECT id, description, "isDone", created_at AS "createdAt"
        FROM tasks 
-       WHERE user_id = $1`, 
-      [userId]
+       WHERE user_id = $1`,
+      [userId],
     );
 
     console.log("✅ [getTodos] Найдено задач:", result.rowCount);

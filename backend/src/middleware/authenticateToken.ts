@@ -56,31 +56,31 @@ const getPublicKey = async (): Promise<string> => {
 export const authenticateToken = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
 
   if (!token) {
     console.log("Received token:", token);
-    return res.status(401).json({ error: 'Token not provided' });
+    return res.status(401).json({ error: "Token not provided" });
   }
 
   try {
     const publicKey = await getPublicKey();
-    const payload = jwt.verify(token, publicKey, { algorithms: ['RS256'] });
+    const payload = jwt.verify(token, publicKey, { algorithms: ["RS256"] });
 
-    if (typeof payload === 'object' && 'sub' in payload) {
+    if (typeof payload === "object" && "sub" in payload) {
       (req as any).userId = payload.sub; // ID пользователя
       (req as any).keycloakToken = payload; // Полезная нагрузка токена
     } else {
-      throw new Error('Invalid token payload: missing sub field.');
+      throw new Error("Invalid token payload: missing sub field.");
     }
 
-    console.log('Token verified successfully. Payload:', payload);
+    console.log("Token verified successfully. Payload:", payload);
     next();
   } catch (error: any) {
-    console.error('Invalid token:', error.message);
+    console.error("Invalid token:", error.message);
     return res.status(403).json({ error: error.message });
   }
 };

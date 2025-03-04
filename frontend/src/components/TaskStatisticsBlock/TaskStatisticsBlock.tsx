@@ -31,7 +31,11 @@ const TaskStatisticsBlock: React.FC = () => {
 
   const { startDate, endDate } = getDateRange();
 
-  const { data: tasks, isLoading, isError } = useQuery({
+  const {
+    data: tasks,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ['todos', keycloak.token],
     queryFn: () => {
       if (!keycloak.token || !keycloak.tokenParsed?.sub) {
@@ -42,7 +46,6 @@ const TaskStatisticsBlock: React.FC = () => {
     refetchOnWindowFocus: true,
     staleTime: 60000,
   });
-  
 
   const filteredTasks = useMemo(() => {
     if (!Array.isArray(tasks) || tasks.length === 0) return []; // Если tasks пустой массив
@@ -50,7 +53,7 @@ const TaskStatisticsBlock: React.FC = () => {
       const taskDate = new Date(task.last_completed_at);
       return taskDate >= startDate && taskDate <= endDate;
     });
-  }, [tasks, startDate, endDate]);  
+  }, [tasks, startDate, endDate]);
 
   const groupedTasks = useMemo(() => {
     if (filteredTasks.length === 0) return [];

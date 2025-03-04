@@ -136,9 +136,10 @@ const TaskDeck: React.FC<Props> = ({ task }) => {
     setIsRunning(false);
     const endTime = new Date();
     const duration = startTime
-      ? Math.floor((endTime.getTime() - startTime.getTime()) / 1000) + elapsedTime
+      ? Math.floor((endTime.getTime() - startTime.getTime()) / 1000) +
+        elapsedTime
       : elapsedTime;
-  
+
     try {
       await todosService.saveTaskTime(
         task.id,
@@ -156,7 +157,7 @@ const TaskDeck: React.FC<Props> = ({ task }) => {
     } catch (error) {
       console.error('Error in handleStopAndMarkAsDone:', error);
     }
-  }, [startTime, elapsedTime, task.id, queryClient]);  
+  }, [startTime, elapsedTime, task.id, queryClient]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;

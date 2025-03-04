@@ -1,6 +1,6 @@
 import axios, { AxiosError } from 'axios';
 import { KeycloakInstance } from 'keycloak-js';
-import {jwtDecode} from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 
 // Читаем URL из .env
 const API_URL = import.meta.env.VITE_API_BASE_URL;
@@ -42,7 +42,10 @@ apiClient.interceptors.request.use(async (config) => {
   if (keycloakInstance) {
     await refreshAccessToken(); // Проверяем и обновляем токен
     if (keycloakInstance.token) {
-      console.log("✅ Adding Authorization Header:", `Bearer ${keycloakInstance.token}`);
+      console.log(
+        '✅ Adding Authorization Header:',
+        `Bearer ${keycloakInstance.token}`
+      );
       config.headers.Authorization = `Bearer ${keycloakInstance.token}`;
     }
   }
@@ -52,7 +55,10 @@ apiClient.interceptors.request.use(async (config) => {
 // Функция для получения задач
 export const getTodos = async (): Promise<any> => {
   if (!keycloakInstance || !keycloakInstance.token) {
-    console.error("❌ User ID is missing from token!", keycloakInstance?.tokenParsed);
+    console.error(
+      '❌ User ID is missing from token!',
+      keycloakInstance?.tokenParsed
+    );
     throw new Error('Keycloak instance or token is not available.');
   }
 
@@ -63,13 +69,13 @@ export const getTodos = async (): Promise<any> => {
     if (axios.isAxiosError(err)) {
       console.error('Error fetching todos:', err.response?.data || err.message);
       throw new Error(
-        err.response?.data?.error || 'Failed to fetch todos. Please try again later.'
+        err.response?.data?.error ||
+          'Failed to fetch todos. Please try again later.'
       );
     }
     throw err;
   }
 };
-
 
 export const updateTodo = async (
   id: string,
@@ -109,22 +115,15 @@ export const createUser = async (username: string, email: string) => {
   }
 };
 
-export const createTask = async (description: string) => {
-  if (!keycloakInstance?.tokenParsed?.sub) {
-    throw new Error('User ID is missing. Please check your authentication.');
-  }
-
-  const userId = keycloakInstance.tokenParsed.sub;
-  console.log("✅ Extracted userId from token:", userId);
-
+export const createTask = async (task: {
+  description: string;
+  userId: string;
+  hasTimer: boolean;
+  alarmTime: string | null;
+  folderId: string | null;
+}) => {
   try {
-    const response = await apiClient.post('/tasks', {
-      description,
-      is_done: false,
-      userId, // Передаем userId из токена
-    });
-
-    console.log('Task created successfully!', response.data);
+    const response = await apiClient.post('/tasks', task);
     return response.data;
   } catch (error) {
     console.error('Error creating task:', error);
@@ -140,7 +139,7 @@ export const createTaskTime = async (
   duration: number
 ) => {
   if (!keycloakInstance?.token) {
-    throw new Error("Token is missing. Please login again.");
+    throw new Error('Token is missing. Please login again.');
   }
 
   const startTimeFormatted = startTime
@@ -165,10 +164,10 @@ export const createTaskTime = async (
         },
       }
     );
-    console.log("Task time created successfully:", response.data);
+    console.log('Task time created successfully:', response.data);
     return response.data;
   } catch (error) {
-    console.error("Error creating task time:", error);
+    console.error('Error creating task time:', error);
     throw error;
   }
 };
@@ -338,7 +337,7 @@ export const getFilteredStats = async (token: string, userId: string) => {
   try {
     const response = await axios.get(`${API_URL}/statistics/weekly-stats`, {
       headers: { Authorization: `Bearer ${token}` },
-      params: { userId }, 
+      params: { userId },
     });
     return response.data;
   } catch (error) {
@@ -348,6 +347,47 @@ export const getFilteredStats = async (token: string, userId: string) => {
       err.response?.data || err.message
     );
     throw err;
+  }
+};
+
+export const getFolders = async () => {
+  try {
+    const response = await apiClient.get('/folders');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching folders:', error);
+    throw error;
+  }
+};
+
+export const createFolder = async (name: string) => {
+  try {
+    const response = await apiClient.post('/folders', { name });
+    return response.data;
+  } catch (error) {
+    console.error('Error creating folder:', error);
+    throw error;
+  }
+};
+
+export const deleteFolder = async (folderId: string) => {
+  try {
+    await apiClient.delete(`/folders/${folderId}`);
+  } catch (error) {
+    console.error('Error deleting folder:', error);
+    throw error;
+  }
+};
+
+export const editFolder = async (folderId: string, newName: string) => {
+  try {
+    const response = await apiClient.put(`/folders/${folderId}`, {
+      name: newName,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error updating folder:', error);
+    throw error;
   }
 };
 
@@ -368,6 +408,10 @@ const todosService = {
   pauseTimer,
   resumeTimer,
   getFilteredStats,
+  deleteFolder,
+  getFolders,
+  createFolder,
+  editFolder,
 };
 
 export default todosService;

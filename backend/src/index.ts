@@ -7,6 +7,7 @@ import tasksRoutes from "./routes/tasks.routes";
 import userRoutes from "./routes/user.routes";
 import timerRoutes from "./routes/timer.routes";
 import statisticsRoutes from "./routes/statistics.routes";
+import folderRoutes from "./routes/folders.routes";
 import fs from "fs";
 
 const app = express();
@@ -43,6 +44,7 @@ app.use("/api/tasks", tasksRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/timer", timerRoutes);
 app.use("/api/statistics", statisticsRoutes);
+app.use("/api/folders", folderRoutes);
 
 // Обработчик 404
 app.use((req, res) => {
@@ -58,13 +60,13 @@ app.use("*", (req, res) => {
 const logFile = fs.createWriteStream("backend.log", { flags: "a" });
 
 console.log = (msg) => {
-    logFile.write(`[${new Date().toISOString()}] ${msg}\n`);
-    process.stdout.write(`[${new Date().toISOString()}] ${msg}\n`);
+  logFile.write(`[${new Date().toISOString()}] ${msg}\n`);
+  process.stdout.write(`[${new Date().toISOString()}] ${msg}\n`);
 };
 
 console.error = (msg) => {
-    logFile.write(`[${new Date().toISOString()}] ERROR: ${msg}\n`);
-    process.stderr.write(`[${new Date().toISOString()}] ERROR: ${msg}\n`);
+  logFile.write(`[${new Date().toISOString()}] ERROR: ${msg}\n`);
+  process.stderr.write(`[${new Date().toISOString()}] ERROR: ${msg}\n`);
 };
 
 // Запуск сервера

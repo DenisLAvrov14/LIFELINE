@@ -16,16 +16,30 @@ export const getTasks = async (req: Request, res: Response) => {
 
 // Создание новой задачи
 export const createTask = async (req: Request, res: Response) => {
-  const { description, isDone = false, userId } = req.body; // Добавляем userId
+  const {
+    description,
+    isDone = false,
+    userId,
+    hasTimer = false,
+    alarmTime = null,
+  } = req.body;
+
+  if (!userId) {
+    return res.status(400).json({ error: "User ID is required" });
+  }
+
   try {
     const result = await pool.query(
-      `INSERT INTO tasks (description, "isDone", user_id) VALUES ($1, $2, $3) RETURNING id, description, "isDone", created_at AS "createdAt"`,
-      [description, isDone, userId], // Передаем userId
+      `INSERT INTO tasks (description, "isDone", user_id, has_timer, alarm_time) 
+       VALUES ($1, $2, $3, $4, $5) 
+       RETURNING id, description, "isDone", created_at AS "createdAt", has_timer, alarm_time`,
+      [description, isDone, userId, hasTimer, alarmTime],
     );
+
     res.status(201).json(result.rows[0]);
   } catch (error: any) {
     console.error("Error creating task:", error.message);
-    res.status(500).send(error.message);
+    res.status(500).json({ error: error.message });
   }
 };
 

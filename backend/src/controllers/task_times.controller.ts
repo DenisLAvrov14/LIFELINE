@@ -146,7 +146,7 @@ export const markTaskAsDone = async (req: Request, res: Response) => {
 
     const result = await pool.query(
       `UPDATE tasks SET "isDone" = TRUE WHERE id = $1 RETURNING id, description, "isDone", created_at AS "createdAt"`,
-      [id]
+      [id],
     );
 
     if (result.rowCount === 0) {

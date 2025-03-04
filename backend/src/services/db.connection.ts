@@ -1,7 +1,7 @@
 import { Pool } from "pg";
 import { dbConfig } from "../config/db.config";
 import path from "path";
-import fs from 'fs';
+import fs from "fs";
 
 export const connection = new Pool({
   host: dbConfig.HOST,
@@ -17,9 +17,9 @@ export const connectDatabase = async () => {
     console.log("Successfully connected to the PostgreSQL database.");
 
     // Читаем SQL-файл с миграциями и выполняем
-    const migrationsPath = path.join(__dirname, '../migrations/init.sql');
+    const migrationsPath = path.join(__dirname, "../migrations/init.sql");
     if (fs.existsSync(migrationsPath)) {
-      const migrationsSQL = fs.readFileSync(migrationsPath, 'utf-8');
+      const migrationsSQL = fs.readFileSync(migrationsPath, "utf-8");
       await connection.query(migrationsSQL);
       console.log("Migrations executed.");
     } else {

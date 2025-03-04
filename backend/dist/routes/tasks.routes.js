@@ -8,5 +8,9 @@ router.get("/", tasks_controller_1.getTasks);
 router.post("/", tasks_controller_1.createTask);
 router.put("/:id", tasks_controller_1.updateTask);
 router.delete("/:id", tasks_controller_1.deleteTask);
-router.put("/:id/done", authenticateToken_1.authenticateToken, tasks_controller_1.markTaskAsDone);
+router.put(
+  "/:id/done",
+  authenticateToken_1.authenticateToken,
+  tasks_controller_1.markTaskAsDone,
+);
 exports.default = router;

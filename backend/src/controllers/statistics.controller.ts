@@ -9,7 +9,7 @@ export const getFilteredStats = async (req: Request, res: Response) => {
     if (!userId) {
       return res
         .status(400)
-        .json({ error: 'User ID is missing in request token' });
+        .json({ error: "User ID is missing in request token" });
     }
 
     console.log(`Fetching stats for user: ${userId}`);
@@ -34,19 +34,19 @@ export const getFilteredStats = async (req: Request, res: Response) => {
 
     if (result.rows.length === 0) {
       return res.status(200).json({
-        message: 'No completed tasks found for the specified user',
+        message: "No completed tasks found for the specified user",
         data: [],
       });
     }
 
     return res.status(200).json(result.rows);
   } catch (error: any) {
-    console.error('Error fetching stats:', error.message);
+    console.error("Error fetching stats:", error.message);
 
     if (error.code) {
-      console.error('Database error code:', error.code);
+      console.error("Database error code:", error.code);
     }
 
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ error: "Internal server error" });
   }
 };

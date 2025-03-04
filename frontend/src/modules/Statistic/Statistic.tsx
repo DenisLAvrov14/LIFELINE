@@ -1,7 +1,6 @@
 import TaskStatisticsBlock from '../../components/TaskStatisticsBlock/TaskStatisticsBlock';
 
 const Statistics: React.FC = () => {
-  
   return (
     <div className="container mx-auto p-6 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 rounded-lg shadow-lg">
       {/* Блок с аватаром */}

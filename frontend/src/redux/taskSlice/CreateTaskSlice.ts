@@ -14,9 +14,44 @@ const taskSlice = createSlice({
   initialState,
   reducers: {
     addTask: (state, action: PayloadAction<Task>) => {
-      const { id, description, isDone } = action.payload;
-      state.tasks[id] = { id, description, isDone };
+      const {
+        id,
+        description,
+        isDone,
+        hasTimer,
+        alarmTime,
+        folderId,
+        category,
+      } = action.payload;
+      state.tasks[id] = {
+        id,
+        description,
+        isDone,
+        hasTimer,
+        alarmTime,
+        folderId,
+        category,
+      };
       state.timer[id] = { time: 0, isRunning: false };
+    },
+
+    updateTaskOptions: (
+      state,
+      action: PayloadAction<{
+        id: string;
+        hasTimer?: boolean;
+        alarmTime?: string | null;
+        folderId?: string | null;
+        category?: string; // ✅ Добавляем возможность обновлять категорию
+      }>
+    ) => {
+      const { id, hasTimer, alarmTime, folderId, category } = action.payload;
+      if (state.tasks[id]) {
+        if (hasTimer !== undefined) state.tasks[id].hasTimer = hasTimer;
+        if (alarmTime !== undefined) state.tasks[id].alarmTime = alarmTime;
+        if (folderId !== undefined) state.tasks[id].folderId = folderId;
+        if (category !== undefined) state.tasks[id].category = category;
+      }
     },
     updateTask: (
       state,
@@ -75,6 +110,7 @@ export const {
   resetTimer,
   incrementTime,
   setFilterValue,
+  updateTaskOptions,
 } = taskSlice.actions;
 
 export default taskSlice.reducer;

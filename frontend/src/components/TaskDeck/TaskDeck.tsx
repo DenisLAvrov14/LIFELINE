@@ -7,6 +7,7 @@ import TaskContent from '../TaskContent/TaskContent';
 import TaskActions from '../TaskActions/TaskActions';
 import { useTaskTimer } from '../../hooks/useTaskTimer';
 import { useAlarmTrigger } from '../../hooks/useAlarmTrigger';
+import posthog from 'posthog-js';
 
 interface Props {
   task: Task;
@@ -82,6 +83,7 @@ const TaskDeck: React.FC<Props> = ({ task }) => {
       ? Math.floor((endTime.getTime() - startTime.getTime()) / 1000) +
         elapsedTime
       : elapsedTime;
+
     try {
       await todosService.saveTaskTime(
         task.id,
@@ -92,6 +94,15 @@ const TaskDeck: React.FC<Props> = ({ task }) => {
       await todosService.taskIsDone(task.id, keycloak.token!);
       queryClient.invalidateQueries({ queryKey: ['todos'] });
       setIsTimerVisible(false);
+
+      // 🟣 Отправляем событие в PostHog
+      posthog.capture('task_completed', {
+        taskId: task.id,
+        description: task.description,
+        category: task.category || 'Uncategorized',
+        duration,
+        isQuickTask: task.isQuickTask,
+      });
     } catch (err) {
       console.error(err);
     }

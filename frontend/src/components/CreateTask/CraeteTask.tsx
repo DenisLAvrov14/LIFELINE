@@ -10,6 +10,7 @@ import { ThemeContext } from '../../providers/ThemeProvider/ThemeProvider';
 import Flatpickr from 'react-flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 import { AxiosError } from 'axios';
+import posthog from 'posthog-js';
 
 interface Folder {
   id: string;
@@ -65,6 +66,15 @@ const CreateTask: React.FC = () => {
         category: taskCategory || null,
         isQuickTask,
       };
+
+      // 🟢 Отправляем в PostHog
+      posthog.capture('task_created', {
+        description: taskDescription,
+        hasTimer,
+        category: taskCategory || 'Uncategorized',
+        folderId: folderId || 'None',
+        isQuickTask,
+      });
 
       console.log('📤 Payload отправки задачи:', newTask);
       return todosService.createTask(newTask);

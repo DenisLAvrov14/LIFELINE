@@ -9,6 +9,7 @@ import Keycloak from 'keycloak-js';
 import keycloakConfig from './keycloak-config';
 import { ThemeProvider } from './providers/ThemeProvider/ThemeProvider';
 import { setKeycloakInstance } from './services/todos.service';
+import { PostHogProvider } from 'posthog-js/react';
 
 // Создаём инстанс Keycloak
 const keycloak = new Keycloak(keycloakConfig);
@@ -23,7 +24,15 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <ThemeProvider>
       <Provider store={store}>
         <QueryClientProvider client={queryClient}>
-          <App />
+          <PostHogProvider
+            apiKey={import.meta.env.VITE_PUBLIC_POSTHOG_KEY}
+            options={{
+              api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
+              debug: import.meta.env.MODE === 'development',
+            }}
+          >
+            <App />
+          </PostHogProvider>
         </QueryClientProvider>
       </Provider>
     </ThemeProvider>

@@ -38,17 +38,13 @@ var __importDefault =
     return mod && mod.__esModule ? mod : { default: mod };
   };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteTodo =
-  exports.updateTodo =
-  exports.createTodo =
-  exports.getTodos =
-    void 0;
+exports.deleteTodo = exports.updateTodo = exports.getTodos = void 0;
 const db_connection_1 = __importDefault(require("../services/db.connection"));
 // Получение всех задач (Todos)
 const getTodos = (req, res) =>
   __awaiter(void 0, void 0, void 0, function* () {
     try {
-      const userId = req.userId; // userId из токена
+      const userId = req.userId;
       console.log("🔍 [getTodos] Запрос задач для userId:", userId);
       if (!userId) {
         console.error("❌ [getTodos] Ошибка: userId отсутствует в запросе");
@@ -56,13 +52,29 @@ const getTodos = (req, res) =>
           .status(400)
           .json({ error: "User ID is missing in request token" });
       }
+      console.log("🛠 getTodos was called");
       const result = yield db_connection_1.default.query(
-        `SELECT id, description, "isDone", created_at AS "createdAt"
-       FROM tasks 
-       WHERE user_id = $1`,
+        `
+SELECT
+  id,
+  user_id,
+  description,
+  "isDone",
+  created_at   AS "createdAt",
+  folder_id    AS "folderId",
+  has_timer    AS "hasTimer",
+  alarm_time   AS "alarmTime",
+  is_quick_task AS "isQuickTask",
+  category                      -- 👈 добавили
+FROM tasks
+WHERE user_id = $1
+ORDER BY created_at DESC
+
+      `,
         [userId],
       );
       console.log("✅ [getTodos] Найдено задач:", result.rowCount);
+      // Отдаём клиенту уже готовый camelCase JSON
       res.json(result.rows);
     } catch (error) {
       console.error("❌ [getTodos] Ошибка при получении задач:", error.message);
@@ -70,24 +82,6 @@ const getTodos = (req, res) =>
     }
   });
 exports.getTodos = getTodos;
-// Создание новой задачи (Todo)
-const createTodo = (req, res) =>
-  __awaiter(void 0, void 0, void 0, function* () {
-    const { description, isDone = false } = req.body;
-    try {
-      const result = yield db_connection_1.default.query(
-        `INSERT INTO tasks (description, "isDone") 
-       VALUES ($1, $2) 
-       RETURNING id, description, "isDone", created_at AS "createdAt"`,
-        [description, isDone],
-      );
-      res.status(201).json(result.rows[0]);
-    } catch (error) {
-      console.error("Error creating todo:", error.message);
-      res.status(500).send("Error creating todo: " + error.message);
-    }
-  });
-exports.createTodo = createTodo;
 // Обновление задачи (Todo)
 const updateTodo = (req, res) =>
   __awaiter(void 0, void 0, void 0, function* () {

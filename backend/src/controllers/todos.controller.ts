@@ -4,7 +4,7 @@ import pool from "../services/db.connection";
 // Получение всех задач (Todos)
 export const getTodos = async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).userId; // userId из токена
+    const userId = (req as any).userId as string;
     console.log("🔍 [getTodos] Запрос задач для userId:", userId);
 
     if (!userId) {
@@ -14,36 +14,46 @@ export const getTodos = async (req: Request, res: Response) => {
         .json({ error: "User ID is missing in request token" });
     }
 
-    const result = await pool.query(
-      `SELECT id, description, "isDone", created_at AS "createdAt"
-       FROM tasks 
-       WHERE user_id = $1`,
+    console.log("🛠 getTodos was called");
+
+    const result = await pool.query<{
+      id: string;
+      user_id: string;
+      description: string;
+      isDone: boolean;
+      created_at: Date;
+      folder_id: string | null;
+      has_timer: boolean;
+      alarm_time: Date | null;
+      is_quick_task: boolean;
+    }>(
+      `
+SELECT
+  id,
+  user_id,
+  description,
+  "isDone",
+  created_at   AS "createdAt",
+  folder_id    AS "folderId",
+  has_timer    AS "hasTimer",
+  alarm_time   AS "alarmTime",
+  is_quick_task AS "isQuickTask",
+  category                      -- 👈 добавили
+FROM tasks
+WHERE user_id = $1
+ORDER BY created_at DESC
+
+      `,
       [userId],
     );
 
     console.log("✅ [getTodos] Найдено задач:", result.rowCount);
+
+    // Отдаём клиенту уже готовый camelCase JSON
     res.json(result.rows);
   } catch (error: any) {
     console.error("❌ [getTodos] Ошибка при получении задач:", error.message);
     res.status(500).json({ error: "Internal server error" });
-  }
-};
-
-// Создание новой задачи (Todo)
-export const createTodo = async (req: Request, res: Response) => {
-  const { description, isDone = false } = req.body;
-
-  try {
-    const result = await pool.query(
-      `INSERT INTO tasks (description, "isDone") 
-       VALUES ($1, $2) 
-       RETURNING id, description, "isDone", created_at AS "createdAt"`,
-      [description, isDone],
-    );
-    res.status(201).json(result.rows[0]);
-  } catch (error: any) {
-    console.error("Error creating todo:", error.message);
-    res.status(500).send("Error creating todo: " + error.message);
   }
 };
 

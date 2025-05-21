@@ -1,45 +1,96 @@
 import { Request, Response } from "express";
 import pool from "../services/db.connection";
 
-// Получение всех задач
-export const getTasks = async (req: Request, res: Response) => {
-  try {
-    const result = await pool.query(
-      `SELECT id, description, "isDone", created_at AS "createdAt" FROM tasks`,
-    );
-    res.json(result.rows);
-  } catch (error: any) {
-    console.error("Error fetching tasks:", error.message);
-    res.status(500).send(error.message);
-  }
-};
-
 // Создание новой задачи
 export const createTask = async (req: Request, res: Response) => {
+  // Логируем тело запроса для отладки
+  console.log("✏️ [createTask] body =", req.body);
+
+  // Берём из тела только те поля, что есть в таблице:
   const {
     description,
-    isDone = false,
-    userId,
     hasTimer = false,
     alarmTime = null,
+    isQuickTask = false,
+    folderId = null,
+    category = null,
   } = req.body;
 
+  // userId кладётся в req.userId вашим authenticateToken
+  const userId = (req as any).userId as string;
   if (!userId) {
-    return res.status(400).json({ error: "User ID is required" });
+    return res.status(401).json({ error: "Unauthorized: User ID missing" });
   }
 
   try {
+    // INSERT с правильными именами колонок:
+    // • description
+    // • "isDone"   ← именно так (mixed-case!), иначе PG не найдёт
+    // • user_id
+    // • folder_id
+    // • has_timer
+    // • alarm_time
+    // • is_quick_task
     const result = await pool.query(
-      `INSERT INTO tasks (description, "isDone", user_id, has_timer, alarm_time) 
-       VALUES ($1, $2, $3, $4, $5) 
-       RETURNING id, description, "isDone", created_at AS "createdAt", has_timer, alarm_time`,
-      [description, isDone, userId, hasTimer, alarmTime],
+      `
+    INSERT INTO public.tasks
+      (
+        description,
+        "isDone",
+        user_id,
+        folder_id,
+        has_timer,
+        alarm_time,
+        is_quick_task,
+        category               -- 👈 добавили
+      )
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)   -- 👈 добавили $8
+    RETURNING
+      id,
+      user_id,
+      description,
+      "isDone",
+      created_at,
+      folder_id,
+      has_timer,
+      alarm_time,
+      is_quick_task,
+      category               -- 👈 добавили
+  `,
+      [
+        description,
+        false,
+        userId,
+        folderId,
+        hasTimer,
+        alarmTime,
+        isQuickTask,
+        category, // 👈 передаём
+      ],
     );
 
-    res.status(201).json(result.rows[0]);
+    const row = result.rows[0];
+
+    // Отдаём клиенту в camelCase-формате
+    res.status(201).json({
+      id: row.id,
+      userId: row.user_id,
+      description: row.description,
+      isDone: row.isDone,
+      createdAt: row.created_at,
+      folderId: row.folder_id,
+      hasTimer: row.has_timer,
+      alarmTime: row.alarm_time,
+      isQuickTask: row.is_quick_task,
+      category: row.category,
+    });
   } catch (error: any) {
-    console.error("Error creating task:", error.message);
-    res.status(500).json({ error: error.message });
+    console.error("❌ [createTask] Error message:", error.message);
+    console.error(error.stack);
+    res.status(500).json({
+      error: error.message,
+      stack: error.stack,
+    });
   }
 };
 
@@ -130,7 +181,6 @@ export const markTaskAsDone = async (req: Request, res: Response) => {
       WHERE task_id = $1::uuid
     `;
     const timeResult = await pool.query(timeQuery, [id]);
-
     const totalTime = timeResult.rows[0]?.total_time || 0;
 
     console.log("Preparing to insert into completed_tasks with values:", {
@@ -138,12 +188,32 @@ export const markTaskAsDone = async (req: Request, res: Response) => {
       id,
       description: task.description,
       totalTime,
+      folderId: task.folder_id,
+      category: task.category,
     });
 
     // Добавляем задачу в таблицу `completed_tasks`
     const insertQuery = `
-      INSERT INTO completed_tasks (id, user_id, task_id, description, total_time, completed_at)
-      VALUES (gen_random_uuid(), $1::uuid, $2::uuid, $3, $4, NOW())
+      INSERT INTO completed_tasks (
+        id,
+        user_id,
+        task_id,
+        description,
+        total_time,
+        completed_at,
+        folder_id,
+        category
+      )
+      VALUES (
+        gen_random_uuid(), 
+        $1::uuid, 
+        $2::uuid, 
+        $3, 
+        $4, 
+        NOW(), 
+        $5, 
+        $6
+      )
       RETURNING *
     `;
     const insertResult = await pool.query(insertQuery, [
@@ -151,6 +221,8 @@ export const markTaskAsDone = async (req: Request, res: Response) => {
       id,
       task.description,
       totalTime,
+      task.folder_id,
+      task.category,
     ]);
 
     if (insertResult.rowCount === 0) {

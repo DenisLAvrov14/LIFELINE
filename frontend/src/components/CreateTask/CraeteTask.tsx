@@ -9,6 +9,7 @@ import { useKeycloak } from '@react-keycloak/web';
 import { ThemeContext } from '../../providers/ThemeProvider/ThemeProvider';
 import Flatpickr from 'react-flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
+import { AxiosError } from 'axios';
 
 interface Folder {
   id: string;
@@ -50,41 +51,40 @@ const CreateTask: React.FC = () => {
 
   const mutation = useMutation({
     mutationFn: async () => {
-      if (!keycloak?.tokenParsed?.sub) {
-        throw new Error('Token or userId is missing');
-      }
       if (!taskDescription.trim()) return;
+
+      // явно приводим alarmTime к string | null
+      const alarmTimeValue: string | null =
+        hasTimer && alarmTime ? alarmTime.toISOString() : null;
 
       const newTask = {
         description: taskDescription,
-        userId: String(keycloak.tokenParsed.sub),
-        hasTimer: hasTimer,
-        alarmTime: hasTimer
-          ? alarmTime
-            ? alarmTime.toISOString()
-            : null
-          : null,
+        hasTimer,
+        alarmTime: alarmTimeValue,
         folderId: folderId ?? null,
         category: taskCategory || null,
+        isQuickTask,
       };
-      return await todosService.createTask(newTask);
+
+      console.log('📤 Payload отправки задачи:', newTask);
+      return todosService.createTask(newTask);
     },
     onSuccess: (data) => {
-      if (!data) {
-        console.error('No data returned from createTask');
-        return;
-      }
+      if (!data) return;
+
       dispatch(
         addTask({
           id: data.id,
           description: data.description,
-          isDone: isQuickTask,
-          hasTimer: data.has_timer,
-          alarmTime: data.alarm_time,
-          folderId: data.folder_id,
+          isDone: data.isDone,
+          hasTimer: data.hasTimer,
+          alarmTime: data.alarmTime,
+          folderId: data.folderId,
           category: data.category,
+          isQuickTask: data.isQuickTask,
         })
       );
+
       queryClient.invalidateQueries({ queryKey: ['todos'] });
       setTaskDescription('');
       setHasTimer(false);
@@ -93,9 +93,15 @@ const CreateTask: React.FC = () => {
       setIsQuickTask(false);
       setTaskCategory('');
     },
-    onError: (error) => {
-      console.error('Error creating task:', error);
-      alert('Failed to create task. Please try again.');
+    onError: (error: AxiosError) => {
+      console.group('❌ createTask failed');
+      console.error('Status:', error.response?.status);
+      console.error('Body:', error.response?.data);
+      console.groupEnd();
+      alert(
+        'Ошибка при создании задачи: ' +
+          ((error.response?.data as { error?: string })?.error || error.message)
+      );
     },
   });
 

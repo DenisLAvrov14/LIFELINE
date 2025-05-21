@@ -48,9 +48,19 @@ const db_connection_1 = __importDefault(require("../services/db.connection"));
 const createTask = (task) =>
   __awaiter(void 0, void 0, void 0, function* () {
     const query = `
-    INSERT INTO tasks (user_id, description, is_done, has_timer, alarm_time)
-    VALUES ($1, $2, $3, $4, $5)
-    RETURNING *;
+    INSERT INTO tasks
+      (user_id, description, is_done, has_timer, alarm_time, is_quick_task)
+    VALUES ($1, $2, $3, $4, $5, $6)
+    RETURNING
+      id,
+      user_id       AS "userId",
+      description,
+      is_done       AS "isDone",
+      has_timer     AS "hasTimer",
+      alarm_time    AS "alarmTime",
+      is_quick_task AS "isQuickTask",
+      folder_id     AS "folderId",
+      category;
   `;
     const values = [
       task.user_id,
@@ -58,14 +68,10 @@ const createTask = (task) =>
       task.is_done,
       task.has_timer,
       task.alarm_time,
+      task.is_quick_task,
     ];
-    try {
-      const result = yield db_connection_1.default.query(query, values);
-      return result.rows[0];
-    } catch (err) {
-      console.error("Error creating task:", err);
-      throw err;
-    }
+    const result = yield db_connection_1.default.query(query, values);
+    return result.rows[0];
   });
 exports.createTask = createTask;
 // Обновление задачи
@@ -95,14 +101,27 @@ const updateTask = (task) =>
   });
 exports.updateTask = updateTask;
 // Получение всех задач пользователя
+// src/services/task.service.ts
 const getTasksByUser = (user_id) =>
   __awaiter(void 0, void 0, void 0, function* () {
     const query = `
-    SELECT * FROM tasks WHERE user_id = $1 ORDER BY created_at DESC;
+    SELECT
+      id,
+      description,
+      is_done       AS "isDone",
+      user_id       AS "userId",
+      has_timer     AS "hasTimer",
+      alarm_time    AS "alarmTime",
+      is_quick_task AS "isQuickTask",
+      folder_id     AS "folderId",
+      category
+    FROM tasks
+    WHERE user_id = $1
+    ORDER BY created_at DESC;
   `;
     try {
       const result = yield db_connection_1.default.query(query, [user_id]);
-      return result.rows;
+      return result.rows; // здесь уже rows[i].isQuickTask есть
     } catch (err) {
       console.error("Error fetching tasks:", err);
       throw err;

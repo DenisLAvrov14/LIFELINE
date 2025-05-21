@@ -1,6 +1,7 @@
 import axios, { AxiosError } from 'axios';
 import { KeycloakInstance } from 'keycloak-js';
 import { jwtDecode } from 'jwt-decode';
+import { Task } from '../models/Task';
 
 // Читаем URL из .env
 const API_URL = import.meta.env.VITE_API_BASE_URL;
@@ -21,6 +22,66 @@ export const setKeycloakInstance = (kc: KeycloakInstance) => {
 const apiClient = axios.create({
   baseURL: API_URL,
 });
+
+// после const apiClient = axios.create({ … })
+apiClient.interceptors.request.use((config) => {
+  console.log(
+    '➡️ [HTTP Request]',
+    config.method?.toUpperCase(),
+    config.url,
+    'data=',
+    config.data
+  );
+  return config;
+});
+apiClient.interceptors.response.use(
+  (response) => {
+    console.log('⬅️ [HTTP Response]', response.status, response.data);
+    return response;
+  },
+  (error) => {
+    console.error(
+      '⬅️ [HTTP Response Error]',
+      error.response?.status,
+      error.response?.data
+    );
+    return Promise.reject(error);
+  }
+);
+
+// Вспомогательная функция — из snake_case (API) в camelCase (наш Task)
+const mapFromApi = (t: any): Task => ({
+  id: t.id,
+  userId: t.userId,
+  description: t.description,
+  isDone: t.isDone,
+  hasTimer: t.hasTimer,
+  alarmTime: t.alarmTime,
+  folderId: t.folderId,
+  category: t.category, // если вы добавите category в контроллер/БД
+  isQuickTask: t.isQuickTask,
+});
+
+// Вспомогательная функция — из нашей camelCase-модели в snake_case для API
+function mapToApi(t: {
+  description: string;
+  userId: string;
+  hasTimer: boolean;
+  alarmTime: string | null;
+  folderId: string | null;
+  category: string | null;
+  isQuickTask: boolean;
+}) {
+  return {
+    description: t.description,
+    user_id: t.userId,
+    has_timer: t.hasTimer,
+    alarm_time: t.alarmTime,
+    folder_id: t.folderId,
+    category: t.category, // ← не забываем
+    is_quick_task: t.isQuickTask,
+  };
+}
 
 // Функция обновления токена
 const refreshAccessToken = async () => {
@@ -53,18 +114,16 @@ apiClient.interceptors.request.use(async (config) => {
 });
 
 // Функция для получения задач
-export const getTodos = async (): Promise<any> => {
+export const getTodos = async (): Promise<Task[]> => {
   if (!keycloakInstance || !keycloakInstance.token) {
-    console.error(
-      '❌ User ID is missing from token!',
-      keycloakInstance?.tokenParsed
-    );
+    console.error('❌ Keycloak token missing', keycloakInstance?.tokenParsed);
     throw new Error('Keycloak instance or token is not available.');
   }
 
   try {
     const response = await apiClient.get('/todos');
-    return response.data;
+    // приводим каждый элемент из snake_case → camelCase
+    return (response.data as any[]).map(mapFromApi);
   } catch (err: any) {
     if (axios.isAxiosError(err)) {
       console.error('Error fetching todos:', err.response?.data || err.message);
@@ -82,14 +141,17 @@ export const updateTodo = async (
   userId: string,
   description: string,
   isDone: boolean
-) => {
+): Promise<Task> => {
   try {
-    const response = await apiClient.put(`/todos/${id}`, {
-      userId,
+    // приводим camelCase → snake_case для отправки
+    const payload = {
+      user_id: userId,
       description,
-      isDone,
-    });
-    return response.data;
+      is_done: isDone,
+    };
+    const { data } = await apiClient.put(`/todos/${id}`, payload);
+    // приводим ответ из snake_case → camelCase
+    return mapFromApi(data);
   } catch (error) {
     console.error('Error updating todo:', error);
     throw error;
@@ -117,18 +179,28 @@ export const createUser = async (username: string, email: string) => {
 
 export const createTask = async (task: {
   description: string;
-  userId: string;
   hasTimer: boolean;
   alarmTime: string | null;
   folderId: string | null;
-}) => {
-  try {
-    const response = await apiClient.post('/tasks', task);
-    return response.data;
-  } catch (error) {
-    console.error('Error creating task:', error);
-    throw error;
-  }
+  category: string | null;
+  isQuickTask: boolean;
+}): Promise<Task> => {
+  const payload = {
+    description: task.description,
+    has_timer: task.hasTimer,
+    hasTimer: task.hasTimer,
+    alarm_time: task.alarmTime,
+    alarmTime: task.alarmTime,
+    is_quick_task: task.isQuickTask,
+    isQuickTask: task.isQuickTask,
+    folder_id: task.folderId,
+    folderId: task.folderId,
+    category: task.category,
+  };
+
+  console.log('➡️ createTask payload:', payload);
+  const { data } = await apiClient.post('/tasks', payload);
+  return mapFromApi(data);
 };
 
 export const createTaskTime = async (

@@ -11,7 +11,6 @@ router.get(
   ensureUserExists_1.ensureUserExists,
   todos_controller_1.getTodos,
 );
-router.post("/", todos_controller_1.createTodo);
 router.put("/:id", todos_controller_1.updateTodo);
 router.delete("/:id", todos_controller_1.deleteTodo);
 exports.default = router;

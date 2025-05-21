@@ -43,17 +43,18 @@ const db_connection_1 = __importDefault(require("../services/db.connection"));
 const getFilteredStats = (req, res) =>
   __awaiter(void 0, void 0, void 0, function* () {
     try {
-      // userId передаётся через middleware authenticateToken
       const userId = req.userId;
       if (!userId) {
         return res
           .status(400)
           .json({ error: "User ID is missing in request token" });
       }
-      console.log(`Fetching stats for user: ${userId}`);
+      console.log(`📊 Fetching stats for user: ${userId}`);
       const query = `
       SELECT 
           description,
+          category,
+          folder_id,
           COUNT(*) AS task_count,
           SUM(total_time) AS total_time,
           MAX(completed_at) AS last_completed_at
@@ -62,7 +63,7 @@ const getFilteredStats = (req, res) =>
       WHERE 
           user_id = $1::uuid
       GROUP BY 
-          description
+          description, category, folder_id
       ORDER BY 
           last_completed_at DESC;
     `;
@@ -75,7 +76,7 @@ const getFilteredStats = (req, res) =>
       }
       return res.status(200).json(result.rows);
     } catch (error) {
-      console.error("Error fetching stats:", error.message);
+      console.error("❌ Error fetching stats:", error.message);
       if (error.code) {
         console.error("Database error code:", error.code);
       }

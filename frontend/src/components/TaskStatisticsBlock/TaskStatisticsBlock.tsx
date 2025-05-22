@@ -127,7 +127,7 @@ const TaskStatisticsBlock: React.FC = () => {
 
   return (
     <section className="my-8 max-w-3xl mx-auto bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-lg shadow-lg p-4">
-      <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 tracking-tight text-gray-900 dark:text-white">
+      <h2 className="text-2xl sm:text-3xl font-bold text-center mb-2 tracking-tight text-gray-900 dark:text-white">
         Task Time Statistics
       </h2>
 
@@ -140,22 +140,9 @@ const TaskStatisticsBlock: React.FC = () => {
         setSelectedFolder={setSelectedFolder}
         folderIds={folderIds}
         categories={categories}
+        chartView={chartView}
+        setChartView={setChartView}
       />
-
-      <div className="flex justify-center gap-4 mb-6">
-        <button
-          onClick={() => setChartView('category')}
-          className={`px-3 py-1 rounded ${chartView === 'category' ? 'bg-blue-500 text-white' : 'bg-gray-300 dark:bg-gray-700'}`}
-        >
-          By Category
-        </button>
-        <button
-          onClick={() => setChartView('task')}
-          className={`px-3 py-1 rounded ${chartView === 'task' ? 'bg-blue-500 text-white' : 'bg-gray-300 dark:bg-gray-700'}`}
-        >
-          By Task
-        </button>
-      </div>
 
       <CategoryPieChart
         data={chartView === 'category' ? categoryChartData : taskChartData}

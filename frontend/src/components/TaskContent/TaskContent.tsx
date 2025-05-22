@@ -1,5 +1,4 @@
 import React from 'react';
-import { Task } from '../../models/Task';
 import { TaskInput } from '../TaskInput/TaskInput';
 import { TaskContentProps } from '../../models/TaskContentProps';
 
@@ -10,7 +9,6 @@ const TaskContent: React.FC<TaskContentProps> = ({
   onChange,
   isTimerVisible,
   time,
-  isAlarmTriggered, // ✅ Деструктурируем
 }) => {
   if (isEdit) {
     return (

@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useCallback, useState } from 'react';
+import React, { ChangeEvent, useCallback, useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useKeycloak } from '@react-keycloak/web';
 import { Task } from '../../models/Task';
@@ -19,6 +19,7 @@ const TaskDeck: React.FC<Props> = ({ task }) => {
 
   const [isEdit, setIsEdit] = useState(false);
   const [inputEdit, setInputEdit] = useState(task.description);
+  const [shouldBlink, setShouldBlink] = useState(false);
 
   const {
     isRunning,
@@ -38,6 +39,12 @@ const TaskDeck: React.FC<Props> = ({ task }) => {
     task.description
   );
 
+  useEffect(() => {
+    if (isAlarmTriggered && !task.isDone) {
+      setShouldBlink(true);
+    }
+  }, [isAlarmTriggered, task.isDone]);
+
   const handleEdit = useCallback(() => setIsEdit((prev) => !prev), []);
   const handleChangeInput = (e: ChangeEvent<HTMLInputElement>) =>
     setInputEdit(e.target.value);
@@ -46,6 +53,7 @@ const TaskDeck: React.FC<Props> = ({ task }) => {
     mutationUpdate.mutate({ id: task.id, description: inputEdit });
 
   const handleStartOrReset = () => {
+    setShouldBlink(false);
     if (isRunning || elapsedTime > 0) {
       setIsRunning(false);
       setIsTimerVisible(false);
@@ -59,8 +67,8 @@ const TaskDeck: React.FC<Props> = ({ task }) => {
     }
   };
 
-  const setTime = (t: number) => {
-    // Прокси для совместимости с useTaskTimer (если понадобится внешняя установка)
+  const setTime = (_t: number) => {
+    // пока не используется
   };
 
   const handlePauseOrResume = () => {
@@ -77,6 +85,7 @@ const TaskDeck: React.FC<Props> = ({ task }) => {
   };
 
   const handleStopAndMarkAsDone = async () => {
+    setShouldBlink(false); // ⛔️ Отключаем мигание при завершении
     setIsRunning(false);
     const endTime = new Date();
     const duration = startTime
@@ -95,7 +104,6 @@ const TaskDeck: React.FC<Props> = ({ task }) => {
       queryClient.invalidateQueries({ queryKey: ['todos'] });
       setIsTimerVisible(false);
 
-      // 🟣 Отправляем событие в PostHog
       posthog.capture('task_completed', {
         taskId: task.id,
         description: task.description,
@@ -123,6 +131,7 @@ const TaskDeck: React.FC<Props> = ({ task }) => {
   });
 
   const handleQuickDone = async () => {
+    setShouldBlink(false); // ⛔️ Отключаем мигание при быстром завершении
     try {
       await todosService.taskIsDone(task.id, keycloak.token!);
       queryClient.invalidateQueries({ queryKey: ['todos'] });
@@ -134,7 +143,7 @@ const TaskDeck: React.FC<Props> = ({ task }) => {
   return (
     <div
       className={`flex flex-col md:flex-row justify-between items-center p-4 rounded-lg shadow-md hover:shadow-lg transition-all w-full max-w-lg space-y-4 md:space-y-0 md:space-x-4 relative
-        ${isAlarmTriggered ? 'animate-pulse bg-red-100 dark:bg-red-900' : 'bg-white dark:bg-gray-800'}
+        ${shouldBlink ? 'animate-pulse bg-red-100 dark:bg-red-900' : 'bg-white dark:bg-gray-800'}
       `}
     >
       <div className="flex-grow text-center md:text-left">
@@ -145,7 +154,7 @@ const TaskDeck: React.FC<Props> = ({ task }) => {
           onChange={handleChangeInput}
           isTimerVisible={isTimerVisible && !task.isQuickTask}
           time={time}
-          isAlarmTriggered={isAlarmTriggered}
+          isAlarmTriggered={shouldBlink}
         />
       </div>
 

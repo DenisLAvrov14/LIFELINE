@@ -62,27 +62,6 @@ const mapFromApi = (t: any): Task => ({
   isQuickTask: t.isQuickTask,
 });
 
-// Вспомогательная функция — из нашей camelCase-модели в snake_case для API
-function mapToApi(t: {
-  description: string;
-  userId: string;
-  hasTimer: boolean;
-  alarmTime: string | null;
-  folderId: string | null;
-  category: string | null;
-  isQuickTask: boolean;
-}) {
-  return {
-    description: t.description,
-    user_id: t.userId,
-    has_timer: t.hasTimer,
-    alarm_time: t.alarmTime,
-    folder_id: t.folderId,
-    category: t.category, // ← не забываем
-    is_quick_task: t.isQuickTask,
-  };
-}
-
 // Функция обновления токена
 const refreshAccessToken = async () => {
   if (keycloakInstance && keycloakInstance.refreshToken) {

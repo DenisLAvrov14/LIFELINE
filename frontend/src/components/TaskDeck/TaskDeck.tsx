@@ -142,11 +142,11 @@ const TaskDeck: React.FC<Props> = ({ task }) => {
 
   return (
     <div
-      className={`flex flex-col md:flex-row justify-between items-center p-4 rounded-lg shadow-md hover:shadow-lg transition-all w-full max-w-lg space-y-4 md:space-y-0 md:space-x-4 relative
-        ${shouldBlink ? 'animate-pulse bg-red-100 dark:bg-red-900' : 'bg-white dark:bg-gray-800'}
-      `}
+      className={`flex flex-col md:flex-row justify-between items-start md:items-center p-4 rounded-lg shadow-md hover:shadow-lg transition-all w-full max-w-lg relative
+      ${shouldBlink ? 'animate-pulse bg-red-100 dark:bg-red-900' : 'bg-white dark:bg-gray-800'}
+    `}
     >
-      <div className="flex-grow text-center md:text-left">
+      <div className="flex-1 min-w-0">
         <TaskContent
           task={task}
           isEdit={isEdit}
@@ -158,7 +158,7 @@ const TaskDeck: React.FC<Props> = ({ task }) => {
         />
       </div>
 
-      <div className="flex flex-wrap justify-center md:justify-end gap-2 relative z-10">
+      <div className="mt-4 md:mt-0 md:ml-4 flex-shrink-0 flex flex-wrap justify-center md:justify-end gap-2 z-10">
         <TaskActions
           isQuickTask={task.isQuickTask ?? false}
           isEdit={isEdit}

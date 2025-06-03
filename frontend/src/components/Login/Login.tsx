@@ -7,10 +7,6 @@ const Login = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log('🔐 Keycloak instance:', keycloak);
-    console.log('✅ Authenticated:', keycloak.authenticated);
-    console.log('🔑 Raw Token:', keycloak.token);
-    console.log('📜 Parsed Token:', keycloak.tokenParsed);
     if (keycloak.authenticated) {
       console.log('🆔 User ID:', keycloak.tokenParsed?.sub);
       navigate('/todo'); // Перенаправление на /todo после успешного входа
@@ -24,13 +20,14 @@ const Login = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
-      <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-4">
-        Please Login
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900 px-4 text-center">
+      <h1 className="text-3xl font-extrabold text-gray-800 dark:text-gray-200 mb-6 leading-snug">
+        Know <span className="text-green-500">everything</span> about your time
       </h1>
+
       <button
         onClick={handleLogin}
-        className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
+        className="px-5 py-2.5 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
       >
         Sign in
       </button>

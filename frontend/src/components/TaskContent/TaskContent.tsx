@@ -32,9 +32,9 @@ const TaskContent: React.FC<TaskContentProps> = ({
   }
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col min-w-0">
       <p
-        className={`font-medium ${
+        className={`font-medium break-words whitespace-pre-wrap w-full ${
           task.isDone
             ? 'line-through text-gray-500 dark:text-gray-400'
             : 'text-gray-800 dark:text-gray-200'

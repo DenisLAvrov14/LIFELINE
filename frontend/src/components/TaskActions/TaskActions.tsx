@@ -58,14 +58,18 @@ const TaskActions: React.FC<Props> = ({
     return (
       <>
         <IconButton
-          className="bg-green-500"
+          className={`bg-green-500 ${isDone ? 'opacity-50 cursor-not-allowed' : ''}`}
           onClick={onDone}
           disabled={isDone}
           title={isDone ? 'Task already completed' : 'Mark as Done'}
         >
           <BiCheck />
         </IconButton>
-        <IconButton className="bg-yellow-400" onClick={onEdit}>
+        <IconButton
+          className={`bg-yellow-400 ${isDone ? 'opacity-50 cursor-not-allowed' : ''}`}
+          onClick={onEdit}
+          disabled={isDone}
+        >
           <BiEditAlt title="Edit Task" />
         </IconButton>
         <IconButton className="bg-red-500" onClick={onDelete}>
@@ -78,19 +82,30 @@ const TaskActions: React.FC<Props> = ({
   if (isTimerVisible) {
     return (
       <>
-        <IconButton className="bg-blue-500" onClick={onStartOrReset}>
+        <IconButton
+          className={`bg-blue-500 ${isDone ? 'opacity-50 cursor-not-allowed' : ''}`}
+          onClick={onStartOrReset}
+          disabled={isDone}
+        >
           <BiReset />
         </IconButton>
-        <IconButton className="bg-yellow-400" onClick={onPauseOrResume}>
+        <IconButton
+          className={`bg-yellow-400 ${isDone ? 'opacity-50 cursor-not-allowed' : ''}`}
+          onClick={onPauseOrResume}
+          disabled={isDone}
+        >
           {isRunning ? <BiPause /> : <BiPlay />}
         </IconButton>
         <IconButton
-          className="bg-green-500"
+          className={`bg-green-500 ${isDone ? 'opacity-50 cursor-not-allowed' : ''}`}
           onClick={onDone}
           disabled={isDone}
           title={isDone ? 'Task already completed' : 'Mark as Done'}
         >
           <BiCheck />
+        </IconButton>
+        <IconButton className="bg-red-500" onClick={onDelete}>
+          <BiSolidTrash />
         </IconButton>
       </>
     );
@@ -98,10 +113,18 @@ const TaskActions: React.FC<Props> = ({
 
   return (
     <>
-      <IconButton className="bg-blue-500" onClick={onStartOrReset}>
+      <IconButton
+        className={`bg-blue-500 ${isDone ? 'opacity-50 cursor-not-allowed' : ''}`}
+        onClick={onStartOrReset}
+        disabled={isDone}
+      >
         <BiTimer />
       </IconButton>
-      <IconButton className="bg-yellow-400" onClick={onEdit}>
+      <IconButton
+        className={`bg-yellow-400 ${isDone ? 'opacity-50 cursor-not-allowed' : ''}`}
+        onClick={onEdit}
+        disabled={isDone}
+      >
         <BiEditAlt />
       </IconButton>
       <IconButton className="bg-red-500" onClick={onDelete}>

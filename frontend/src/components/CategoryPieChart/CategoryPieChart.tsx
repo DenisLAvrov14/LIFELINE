@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts';
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 import { useMediaQuery } from 'react-responsive';
 
 interface CategoryPieChartProps {
@@ -39,20 +32,18 @@ const CategoryPieChart: React.FC<CategoryPieChartProps> = ({
   const isMobile = useMediaQuery({ maxWidth: 640 });
   const total = data.reduce((sum, entry) => sum + entry.value, 0);
 
-  const chartMargins = isMobile
-    ? { top: 0, bottom: 0, right: 0, left: 0 }
-    : { top: 20, bottom: 20, right: 100, left: 0 };
+  const chartHeight = isMobile ? 240 : 320;
 
   return (
-    <div className="w-full flex flex-col items-center">
-      <div className="w-full max-w-[280px] sm:max-w-full aspect-square">
+    <div className="w-full flex flex-col items-center gap-4 mt-6 mb-2">
+      <div className="w-full max-w-2xl h-[320px] sm:h-[360px]">
         <ResponsiveContainer width="100%" height="100%">
-          <PieChart margin={chartMargins}>
+          <PieChart>
             <Pie
               data={data}
               dataKey="value"
               nameKey="name"
-              outerRadius={isMobile ? 90 : 100}
+              outerRadius={isMobile ? 90 : 120}
               fill="#8884d8"
               label={false}
             >
@@ -72,33 +63,23 @@ const CategoryPieChart: React.FC<CategoryPieChartProps> = ({
                 return [`${h}h ${m}m ${s}s (${percent}%)`, 'Total time'];
               }}
             />
-            {!isMobile && (
-              <Legend
-                layout="vertical"
-                align="right"
-                verticalAlign="middle"
-                iconType="circle"
-              />
-            )}
           </PieChart>
         </ResponsiveContainer>
       </div>
 
-      {isMobile && (
-        <div className="mt-4 flex flex-col items-start gap-1 text-sm w-full px-6">
-          {data.map((entry, index) => (
-            <div key={entry.name} className="flex items-center gap-2">
-              <span
-                className="inline-block w-3.5 h-3.5 rounded-full"
-                style={{ backgroundColor: colors[index % colors.length] }}
-              ></span>
-              <span className="text-gray-700 dark:text-gray-200">
-                {entry.name}
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
+      <div className="flex flex-wrap justify-center gap-3 text-sm w-full max-w-4xl px-4">
+        {data.map((entry, index) => (
+          <div key={entry.name} className="flex items-center gap-2">
+            <span
+              className="inline-block w-3.5 h-3.5 rounded-full"
+              style={{ backgroundColor: colors[index % colors.length] }}
+            ></span>
+            <span className="text-gray-700 dark:text-gray-200 break-all max-w-[150px]">
+              {entry.name}
+            </span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
